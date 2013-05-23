@@ -8,7 +8,7 @@ except ImportError:
 
 manager = None
 
-KEY_CACHE = {}
+from . import utils
 
 def init():
     import logging
@@ -20,36 +20,11 @@ def init():
     manager = Manager()
     manager.init()
 
-def expand(name):
-    return vim.eval('expand("{}")'.format(name))
-
-def get_key_code(key):
-    try:
-        return KEY_CACHE[key]
-    except KeyError:
-        pass
-
-    code = KEY_CACHE[key] = expand('\<{}>'.format(key))
-    return code
-
-def filetype_changed():
-    bufn = expand('<abuf>')
-    filetype = expand('<amatch>')
+# def filetype_changed():
+#     bufn = expand('<abuf>')
+#     filetype = expand('<amatch>')
 
 def event_received():
     event = vim.eval("a:event")
-    print event
-
-def test():
-    import threading, time
-    b = vim.current.buffer
-    def work():
-        for _ in range(10):
-            print vim.current.window.buffer.number, vim.current.window.cursor
-            vim.current.window.cursor = vim.current.window.cursor
-            vim.command(':redraw')
-            time.sleep(1)
-    
-    t = threading.Thread(target=work)
-    t.start()
+    # print(event)
 

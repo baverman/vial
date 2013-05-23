@@ -1,10 +1,11 @@
+import vial
+
 from . import vim
 from .plugins import Manager as PluginManager, init_plugins
 
 class Manager(object):
     def __init__(self):
         self.callbacks = {}
-        self.commands = {}
 
     def var(self, name, default=None):
         try:
@@ -25,15 +26,6 @@ class Manager(object):
         self.callbacks.setdefault(name, []).append(callback)
 
     def register_command(self, name, callback):
-        self.commands[name] = callback
-        vim.command('''command! -nargs=0 {0} :python vial.manager.invoke('{0}')'''.format(name))
+        setattr(vial, name, callback)
+        vim.command('''command! -nargs=0 {0} :python vial.{0}()'''.format(name))
 
-    def invoke(self, name):
-        self.commands[name]()
-
-    def redraw(self, clear=False):
-        cmd = 'redraw'
-        if clear:
-            cmd += '!'
-
-        vim.command(cmd)

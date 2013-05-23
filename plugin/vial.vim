@@ -12,7 +12,7 @@ let g:loaded_vial = "true"
 
 augroup autovial
     autocmd VimEnter * :python vial.init()
-    autocmd FileType * :python vial.filetype_changed()
+    " autocmd FileType * :python vial.filetype_changed()
 augroup END
 
 function! VialEmit(event)
