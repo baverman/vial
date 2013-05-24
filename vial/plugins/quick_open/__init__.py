@@ -12,7 +12,7 @@ def update_status(prompt):
 
 def quick_open():
     vim.command('botright split __vial_quick_open__')
-    vim.command('setlocal buftype=nofile')
+    vim.command('setlocal buftype=nofile noswapfile')
     buf = vim.current.buffer
     prompt = u''
     update_status(prompt)
