@@ -1,3 +1,4 @@
+import sys
 from vial import vim
 
 KEY_CACHE = {}
@@ -43,6 +44,30 @@ def echo(message=None):
         vim.command("echo '{}'".format(message))
     else:
         vim.command('echo')
+
+def lfunc(name):
+    globs = sys._getframe(1).f_globals
+    def inner(*args, **kwargs):
+        try:
+            func = inner.func
+        except AttributeError:
+            module, _, func_name = name.rpartition('.')
+            module_name = module.lstrip('.')
+            level = len(module) - len(module_name)
+
+            module = __import__(module_name, globals=globs, level=level)
+            if not level:
+                module = sys.modules[module_name]
+
+            try:
+                func = inner.func = getattr(module, func_name)
+            except AttributeError:
+                raise AttributeError("module '{}' has no attribute '{}'".format(module.__name__, func_name))
+
+        return func(*args, **kwargs)
+
+    inner.__name__ = name
+    return inner
 
 class Func(object):
     def __init__(self):
