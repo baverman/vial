@@ -23,7 +23,7 @@ class QuickOpen(object):
             vim.command('botright split __vial_quick_open__')
             if not buf:
                 vim.command('setlocal buftype=nofile noswapfile cursorline nonumber nobuflisted')
-                vim.command('noremap <buffer> <silent> loop :python vial.plugins.quick_open.plugin.dialog.loop()<CR>')
+                vim.command('noremap <buffer> <silent> <Plug>l :python vial.plugins.quick_open.plugin.dialog.loop()<CR>')
 
             self.buf = vim.current.buffer
             self.win = vim.current.window
@@ -63,7 +63,7 @@ class QuickOpen(object):
                 self.update_status()
             else:
                 sleep(0.02)
-                vim.func.feedkeys('loop')
+                vim.func.feedkeys(get_key_code('Plug') + 'l')
                 return
 
         vim.command('close')
