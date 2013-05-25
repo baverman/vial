@@ -62,12 +62,29 @@ def lfunc(name):
             try:
                 func = inner.func = getattr(module, func_name)
             except AttributeError:
-                raise AttributeError("module '{}' has no attribute '{}'".format(module.__name__, func_name))
+                raise AttributeError("module '{}' has no attribute '{}'".format(
+                    module.__name__, func_name))
 
         return func(*args, **kwargs)
 
     inner.__name__ = name
     return inner
+
+def get_winbuf(name):
+    buf = win = None
+    num = vim.func.bufnr(name)
+    for b in vim.buffers:
+        if b.number == num:
+            buf = b
+            break
+
+    if buf:
+        for w in vim.windows:
+            if w.buffer == buf:
+                win = w
+                break
+
+    return win, buf
 
 class Func(object):
     def __init__(self):
