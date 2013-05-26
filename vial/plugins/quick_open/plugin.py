@@ -4,14 +4,17 @@ from time import sleep
 
 from vial import vim
 from vial.utils import get_key, get_key_code, redraw, echo, get_winbuf
+from vial.events import Loop
 
-dialog = None
+from .. import quick_open as module
+
+module.dialog = None
+
 def quick_open():
-    global dialog
-    if not dialog:
-        dialog = QuickOpen()
+    if not module.dialog:
+        module.dialog = QuickOpen()
 
-    dialog.open()
+    module.dialog.open()
 
 class QuickOpen(object):
     def open(self):
@@ -22,8 +25,17 @@ class QuickOpen(object):
         else:
             vim.command('botright split __vial_quick_open__')
             if not buf:
+                self.loop = Loop(get_key_code('Plug') + 'l')
+                self.loop.on_key('CR', self.exit)
+                self.loop.on_key('Esc', self.exit)
+                self.loop.on_key('Up', self.move_cursor, -1)
+                self.loop.on_key('Down', self.move_cursor, 1)
+                self.loop.on_key('BS', self.prompt_changed, None)
+                self.loop.on_printable(self.prompt_changed)
+
                 vim.command('setlocal buftype=nofile noswapfile cursorline nonumber nobuflisted')
-                vim.command('noremap <buffer> <silent> <Plug>l :python vial.plugins.quick_open.plugin.dialog.loop()<CR>')
+                vim.command('noremap <buffer> <silent> <Plug>l '
+                    ':python vial.plugins.quick_open.dialog.loop.enter()<CR>')
 
             self.buf = vim.current.buffer
             self.win = vim.current.window
@@ -34,41 +46,34 @@ class QuickOpen(object):
 
         self.prompt = u''
         self.update_status()
-        self.loop()
+        self.loop.enter()
 
-    def loop(self):
-        while True:
-            key, is_special = get_key()
-            if key:
-                if is_special:
-                    if key == get_key_code('CR') or key == get_key_code('ESC'):
-                        break
-
-                    elif key == get_key_code('Down'):
-                        line, col = self.win.cursor
-                        if line < len(self.buf):
-                            line += 1
-                        self.win.cursor = line, col
-                    elif key == get_key_code('Up'):
-                        line, col = self.win.cursor
-                        if line > 1:
-                            line -= 1
-                        self.win.cursor = line, col
-
-                    elif key == get_key_code('BS'):
-                        self.prompt = self.prompt[:-1]
-                else:
-                    self.prompt += key
-
-                self.update_status()
-            else:
-                sleep(0.02)
-                vim.func.feedkeys(get_key_code('Plug') + 'l')
-                return
-
+    def exit(self):
         vim.command('close')
         redraw()
         echo()
+        self.loop.exit()
+
+    def move_cursor(self, dir):
+        line, col = self.win.cursor
+        line += dir
+
+        if line < 1:
+            line = 1
+
+        if line > len(self.buf):
+            line = len(self.buf)
+
+        self.win.cursor = line, col
+        self.loop.refresh()
+
+    def prompt_changed(self, key):
+        if key is None:
+            self.prompt = self.prompt[:-1]
+        else:
+            self.prompt += key
+
+        self.update_status()
 
     def update_status(self):
         redraw()
