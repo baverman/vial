@@ -57,7 +57,7 @@ class Loop(object):
         self.reenter = False
 
     def idle(self, generator):
-        self.events.append(generator)
+        self.tasks.append(generator)
 
     def on_key(self, key, handler, *args):
         self.handlers[get_key_code(key)] = (handler, args)

@@ -7,6 +7,7 @@ from vial.utils import get_key, get_key_code, redraw, echo, get_winbuf
 from vial.events import Loop
 
 from .. import quick_open as module
+from . import search
 
 module.dialog = None
 
@@ -17,6 +18,10 @@ def quick_open():
     module.dialog.open()
 
 class QuickOpen(object):
+    def __init__(self):
+        self.prompt = u''
+        self.filelist = []
+
     def open(self):
         win, buf = get_winbuf('__vial_quick_open__')
         if win:
@@ -26,7 +31,7 @@ class QuickOpen(object):
             vim.command('botright split __vial_quick_open__')
             if not buf:
                 self.loop = Loop(get_key_code('Plug') + 'l')
-                self.loop.on_key('CR', self.exit)
+                self.loop.on_key('CR', self.exit, True)
                 self.loop.on_key('Esc', self.exit)
                 self.loop.on_key('Up', self.move_cursor, -1)
                 self.loop.on_key('Down', self.move_cursor, 1)
@@ -41,15 +46,21 @@ class QuickOpen(object):
             self.win = vim.current.window
 
         self.roots = [os.getcwd()]
-        self.filelist = []
-        self.fill_with_dirs()
 
         self.prompt = u''
         self.update_status()
         self.loop.enter()
 
-    def exit(self):
+    def exit(self, select=False):
+        cursor = self.win.cursor
         vim.command('close')
+        if select:
+            try:
+                fname = self.filelist[cursor[0] - 1][2]
+                vim.command('e {}'.format(fname))
+            except IndexError:
+                pass
+
         redraw()
         echo()
         self.loop.exit()
@@ -74,48 +85,49 @@ class QuickOpen(object):
             self.prompt += key
 
         self.update_status()
+        if self.prompt:
+            self.loop.idle(self.fill())
 
     def update_status(self):
+        if not self.prompt:
+            self.buf[0:] = ['Type something to search']
+
         redraw()
         echo(u'>>> {}_'.format(self.prompt))
 
-    def fill_with_dirs(self, root='', top='', place=False):
-        dirs = []
-        files = []
-
-        # conf = self.pwindow().manager.conf
-        hidden_masks = None
-        # if not conf['QUICK_OPEN_SHOW_HIDDEN']:
-        #     hidden_masks = conf['QUICK_OPEN_HIDDEN_FILES']
-
-        if not top and len(self.roots) > 1:
-            for r in self.roots:
-                dirs.append((os.path.basename(r), r, os.path.dirname(r), ''))
-        else:
-            if not top:
-                root = self.roots[0]
-
-            for name in os.listdir(os.path.join(root, top)):
-                if hidden_masks and any(name.endswith(m) for m in hidden_masks):
-                    continue
-
-                fpath = os.path.join(root, top, name)
-                if os.path.isdir(fpath):
-                    dirs.append((name + '/', fpath, root, top))
-                else:
-                    files.append((name, fpath, root, top))
-
+    def fill(self):
+        current = self.current = object()
         self.filelist[:] = []
-        place_idx = 0
-        for i, (name, fpath, root, top) in enumerate(sorted(dirs) + sorted(files)):
-            if name == place:
-                place_idx = i
-            self.filelist.append((name, top, fpath, root))
+        last_index = 0
+        cnt = 0
+        already_matched = {}
+        for m in search.get_matchers(self.prompt):
+            for r in self.roots:
+                for name, path, root, top, fpath in search.get_files(r, ''):
+                    if current is not self.current:
+                        return
 
-        self.render_filelist(0, place_idx)
-        # if place and len(self.filelist):
-        #     self.filelist_tree.set_cursor((place_idx,))
-        
-    def render_filelist(self, start, cursor):
-        for i, (name, top, _, _) in enumerate(self.filelist[start:], start):
-            self.buf[i:] = ['  ' + name]
+                    if fpath not in already_matched and m(name, path):
+                        already_matched[fpath] = True
+                        self.filelist.append((name, top, fpath, root))
+
+                    cnt += 1
+                    if not cnt % 50:
+                        last_index = self.render(last_index)
+                        if last_index > 20:
+                            self.loop.refresh()
+                            return
+
+                        yield
+                        
+        if not self.render(last_index):
+            self.buf[0:] = ['Matches not found']
+
+        self.loop.refresh()
+
+    def render(self, start):
+        if start < len(self.filelist):
+            for i, (name, top, _, _) in enumerate(self.filelist[start:], start):
+                self.buf[i:] = ['  {}  {}'.format(name, top)]
+
+        return len(self.filelist)
