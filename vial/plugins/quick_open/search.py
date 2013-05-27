@@ -28,7 +28,7 @@ def path_match(what):
     return inner
 
 def get_matchers(pattern):
-    return name_startswith(pattern), name_match(pattern)
+    return name_startswith(pattern), name_match(pattern), path_match(pattern)
 
 def get_files(root, top, ignore_files=None, ignore_dirs=None):
     dirs_to_visit = []

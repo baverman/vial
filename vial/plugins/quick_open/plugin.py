@@ -42,7 +42,7 @@ class QuickOpen(object):
                 self.loop.on_key('BS', self.prompt_changed, None)
                 self.loop.on_printable(self.prompt_changed)
 
-                vim.command('setlocal buftype=nofile noswapfile cursorline nonumber')
+                vim.command('setlocal buftype=nofile noswapfile cursorline nonumber colorcolumn=')
                 vim.command('noremap <buffer> <silent> <Plug>l '
                     ':python vial.plugins.quick_open.dialog.loop.enter()<CR>')
 
