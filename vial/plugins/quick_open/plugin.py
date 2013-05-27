@@ -107,9 +107,21 @@ class QuickOpen(object):
         cnt = 0
         already_matched = {}
 
+        file_cache = {}
+        def fill_cache(seq, cache):
+            for r in seq:
+                cache.append(r)
+                yield r
+
         for m in search.get_matchers(self.prompt):
             for r in self.roots:
-                for name, path, root, top, fpath in search.get_files(r, '', IGNORE_FILES, IGNORE_DIRS):
+                if r in file_cache:
+                    flist = file_cache[r]
+                else:
+                    cache = file_cache[r] = []
+                    flist = fill_cache(search.get_files(r, '', IGNORE_FILES, IGNORE_DIRS), cache)
+
+                for name, path, root, top, fpath in flist:
                     if current is not self.current:
                         return
 
