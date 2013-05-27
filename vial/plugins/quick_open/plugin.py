@@ -1,4 +1,5 @@
 import os.path
+import re
 
 from time import sleep
 
@@ -10,6 +11,9 @@ from .. import quick_open as module
 from . import search
 
 module.dialog = None
+
+IGNORE_DIRS = re.compile(r'(^|.*/)(\.git|\.svn|\.hg)$')
+IGNORE_FILES = re.compile(r'^.*(\.pyc|\.pyo|\.swp|\.class|\.o)$')
 
 def quick_open():
     if not module.dialog:
@@ -102,9 +106,10 @@ class QuickOpen(object):
         last_index = 0
         cnt = 0
         already_matched = {}
+
         for m in search.get_matchers(self.prompt):
             for r in self.roots:
-                for name, path, root, top, fpath in search.get_files(r, ''):
+                for name, path, root, top, fpath in search.get_files(r, '', IGNORE_FILES, IGNORE_DIRS):
                     if current is not self.current:
                         return
 
