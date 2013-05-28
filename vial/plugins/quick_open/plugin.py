@@ -6,6 +6,7 @@ from time import sleep
 from vial import vim
 from vial.utils import get_key, get_key_code, redraw, echo, get_winbuf
 from vial.events import Loop
+from vial.widgets import ListFormatter, ListView
 
 from .. import quick_open as module
 from . import search
@@ -24,7 +25,7 @@ def quick_open():
 class QuickOpen(object):
     def __init__(self):
         self.prompt = u''
-        self.filelist = []
+        self.filelist = ListView(ListFormatter(0, 0, 1, 1))
 
     def open(self):
         win, buf = get_winbuf('__vial_quick_open__')
@@ -52,6 +53,8 @@ class QuickOpen(object):
         vim.command('setlocal nobuflisted')
         self.roots = [os.getcwd()]
 
+        self.filelist.attach(self.buf, self.win)
+
         self.prompt = u''
         self.update_status()
         self.loop.enter()
@@ -61,7 +64,7 @@ class QuickOpen(object):
         vim.command('close')
         if select:
             try:
-                fname = self.filelist[cursor[0] - 1][2]
+                fname = self.filelist.items[cursor[0] - 1][2]
                 vim.command('e {}'.format(fname))
             except IndexError:
                 pass
@@ -102,7 +105,7 @@ class QuickOpen(object):
 
     def fill(self):
         current = self.current = object()
-        self.filelist[:] = []
+        self.filelist.clear()
         last_index = 0
         cnt = 0
         already_matched = {}
@@ -131,21 +134,13 @@ class QuickOpen(object):
 
                     cnt += 1
                     if not cnt % 50:
-                        last_index = self.render(last_index)
-                        if last_index > 20:
+                        if self.filelist.render() > 20:
                             self.loop.refresh()
                             return
 
                         yield
                         
-        if not self.render(last_index):
+        if not self.filelist.render():
             self.buf[0:] = ['Matches not found']
 
         self.loop.refresh()
-
-    def render(self, start):
-        if start < len(self.filelist):
-            for i, (name, top, _, _) in enumerate(self.filelist[start:], start):
-                self.buf[i:] = ['  {}  {}'.format(name, top)]
-
-        return len(self.filelist)
