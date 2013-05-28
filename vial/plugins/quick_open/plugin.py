@@ -39,7 +39,9 @@ class QuickOpen(object):
                 self.loop.on_key('CR', self.exit, True)
                 self.loop.on_key('Esc', self.exit)
                 self.loop.on_key('Up', self.move_cursor, -1)
+                self.loop.on_key('C-K', self.move_cursor, -1)
                 self.loop.on_key('Down', self.move_cursor, 1)
+                self.loop.on_key('C-J', self.move_cursor, 1)
                 self.loop.on_key('BS', self.prompt_changed, None)
                 self.loop.on_printable(self.prompt_changed)
 
