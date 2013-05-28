@@ -45,7 +45,7 @@ class QuickOpen(object):
                 self.loop.on_key('BS', self.prompt_changed, None)
                 self.loop.on_printable(self.prompt_changed)
 
-                vim.command('setlocal buftype=nofile noswapfile cursorline nonumber colorcolumn=')
+                vim.command('setlocal buftype=nofile noswapfile nonumber colorcolumn=')
                 vim.command('noremap <buffer> <silent> <Plug>l '
                     ':python vial.plugins.quick_open.dialog.loop.enter()<CR>')
 
@@ -100,6 +100,7 @@ class QuickOpen(object):
 
     def update_status(self):
         if not self.prompt:
+            vim.command('setlocal nocursorline')
             self.buf[0:] = ['Type something to search']
 
         redraw()
@@ -132,6 +133,8 @@ class QuickOpen(object):
 
                     if fpath not in already_matched and m(name, path):
                         already_matched[fpath] = True
+                        if len(already_matched) == 1:
+                            vim.command('setlocal cursorline')
                         self.filelist.append((name, top, fpath, root))
 
                     cnt += 1
@@ -143,6 +146,7 @@ class QuickOpen(object):
                         yield
                         
         if not self.filelist.render():
-            self.buf[0:] = ['Matches not found']
+            vim.command('setlocal nocursorline')
+            self.buf[0:] = ['No matches']
 
         self.loop.refresh()
