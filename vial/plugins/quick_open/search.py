@@ -68,8 +68,8 @@ def get_matchers(pattern):
         return name_endswith(pattern), name_startswith(pattern),\
             name_match(pattern), path_match(pattern)
     elif os.sep in pattern:
-        return path_match(pattern), path_items_startswith(pattern, 0),\
-            path_items_startswith(pattern, 1), path_items_match(pattern) 
+        return path_items_startswith(pattern, 0), path_items_startswith(pattern, 1),\
+            path_items_match(pattern), path_match(pattern) 
 
     return name_startswith(pattern), name_match(pattern), path_match(pattern)
 
