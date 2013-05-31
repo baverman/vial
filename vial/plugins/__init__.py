@@ -1,4 +1,5 @@
 import sys
+import os.path
 import logging
 import weakref
 
@@ -15,23 +16,39 @@ def get_plugin(name):
     package_name = 'vial.plugins.' + name
     return get_package(package_name)
 
-def init_plugins(manager, names):
-    for name in names:
-        try:
-            p = get_plugin(name)
-        except:
-            log.exception('Plugin import failed')
-        else:
-            manager.add_plugin(p)
+def find_plugins(path):
+    plugins = []
+    for p in path:
+        vp = os.path.join(p, 'vial-plugin')
+        if os.path.exists(vp):
+            if vp not in __path__:
+                __path__.insert(0, vp)
+
+            for name in os.listdir(vp):
+                if os.path.exists(os.path.join(vp, name, '__init__.py')):
+                    plugins.append(name)
+    
+    return plugins
+
 
 class Manager(object):
     def __init__(self):
         self.plugins = []
 
-    def add_plugin(self, plugin):
+    def add_from(self, path):
+        for name in find_plugins(path):
+            try:
+                self.add(get_plugin(name))
+            except:
+                log.exception('Plugin import failed')
+
+    def add(self, plugin):
         self.plugins.append(plugin)
-        try:
-            plugin.init()
-        except:
-            log.exception('Plugin init failed')
+
+    def init(self):
+        for p in self.plugins:
+            try:
+                p.init()
+            except:
+                log.exception('Plugin init failed')
 

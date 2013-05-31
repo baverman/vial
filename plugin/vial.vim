@@ -31,5 +31,15 @@ function! VialGetKey()
     return chr
 endfunction
 
-python import vial
+python << EOF
+import sys
+import os.path
+import vim
+rtp = vim.eval('&runtimepath')
+for p in rtp.split(','):
+    if os.path.exists(os.path.join(p, 'vial', '__init__.py')):
+        sys.path.insert(0, p)
+
+import vial
+EOF
 

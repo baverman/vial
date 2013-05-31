@@ -1,7 +1,7 @@
 import vial
 
 from . import vim
-from .plugins import Manager as PluginManager, init_plugins
+from .plugins import Manager as PluginManager
 
 class Manager(object):
     def __init__(self):
@@ -15,7 +15,8 @@ class Manager(object):
 
     def init(self):
         self.plugin_manager = PluginManager()
-        init_plugins(self.plugin_manager, self.var('vial_plugins', []))
+        self.plugin_manager.add_from(vim.eval('&runtimepath').split(','))
+        self.plugin_manager.init()
 
     def emit(self, name, *args):
         if name in self.callbacks:
