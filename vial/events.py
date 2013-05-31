@@ -1,6 +1,6 @@
 from time import sleep, time
 
-from . import vim
+from . import vfunc
 from .utils import get_key_code, get_key
 
 TIME_SLICE = 0.02
@@ -45,7 +45,7 @@ class Loop(object):
             if self.do_release:
                 self.do_release = False
                 if self.reenter:
-                    vim.func.feedkeys(self.feedkeys)
+                    vfunc.feedkeys(self.feedkeys)
                 return
 
     def refresh(self):

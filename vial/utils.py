@@ -1,4 +1,6 @@
 import sys
+
+import vial
 from vial import vim
 
 KEY_CACHE = {}
@@ -8,11 +10,11 @@ def get_key_code(key):
     except KeyError:
         pass
 
-    code = KEY_CACHE[key] = vim.func.eval('"\<{}>"'.format(key))
+    code = KEY_CACHE[key] = vial.vfunc.eval('"\<{}>"'.format(key))
     return code
 
 def get_key():
-    c = vim.func.VialGetKey()
+    c = vial.vfunc.VialGetKey()
     is_special = False
     if c:
         if len(c) == 1:
@@ -72,7 +74,7 @@ def lfunc(name):
 
 def get_winbuf(name):
     buf = win = None
-    num = vim.func.bufnr(name)
+    num = vial.vfunc.bufnr(name)
     for b in vim.buffers:
         if b.number == num:
             buf = b
@@ -99,4 +101,4 @@ class Func(object):
         func = self._cache[name] = vim.bindeval('function("{}")'.format(name))
         return func
 
-vim.func = Func()
+vial.vfunc = Func()
