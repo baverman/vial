@@ -88,6 +88,13 @@ def get_winbuf(name):
 
     return win, buf
 
+def get_var(name, default=None):
+    try:
+        return vim.vars[name]
+    except KeyError:
+        return default
+
+
 class Func(object):
     def __init__(self):
         self._cache = {}

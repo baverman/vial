@@ -7,12 +7,6 @@ class Manager(object):
     def __init__(self):
         self.callbacks = {}
 
-    def var(self, name, default=None):
-        try:
-            return vim.vars[name]
-        except KeyError:
-            return default
-
     def init(self):
         self.plugin_manager = PluginManager()
         self.plugin_manager.add_from(vim.eval('&runtimepath').split(','))
