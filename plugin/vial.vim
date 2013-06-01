@@ -12,7 +12,6 @@ let g:loaded_vial = "true"
 
 augroup autovial
     autocmd VimEnter * :python vial.init()
-    " autocmd FileType * :python vial.filetype_changed()
 augroup END
 
 function! VialEmit(event)
@@ -39,6 +38,7 @@ rtp = vim.eval('&runtimepath')
 for p in rtp.split(','):
     if os.path.exists(os.path.join(p, 'vial', '__init__.py')):
         sys.path.insert(0, p)
+        break
 
 import vial
 EOF

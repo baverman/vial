@@ -72,14 +72,17 @@ def lfunc(name):
     inner.__name__ = name
     return inner
 
-def get_winbuf(name):
-    buf = win = None
-    num = vial.vfunc.bufnr(name)
+def get_buf(bufnr):
     for b in vim.buffers:
-        if b.number == num:
-            buf = b
-            break
+        if b.number == bufnr:
+            return b
+    
+    return None
 
+def get_winbuf(name):
+    win = None
+    num = vial.vfunc.bufnr(name)
+    buf = get_buf(num)
     if buf:
         for w in vim.windows:
             if w.buffer == buf:
