@@ -29,9 +29,19 @@ class Manager(object):
     def on(self, name, callback):
         self.callbacks.setdefault(name, []).append(callback)
 
-    def register_command(self, name, callback):
+    def register_command(self, name, callback, **opts):
         setattr(vial, name, callback)
-        vim.command('''command! -nargs=0 {0} :python vial.{0}()'''.format(name))
+        fargs = '' if opts.get('nargs', 0) < 1 else '<f-args>'
+        opts = ' '.join('-{}={}'.format(*r) for r in opts.iteritems())
+        vim.command('''command! {1} {0} python vial.{0}({2})'''.format(name, opts, fargs))
+
+    def register_function(self, signature, callback):
+        name = signature.partition('(')[0]
+        setattr(vial, name, callback)
+        vim.command('''function! {0}
+          python vial.{1}()
+          return a:result
+        endfunction'''.format(signature, name))
 
     def filetype_changed(self):
         ft = vial.vfunc.expand('<amatch>')
