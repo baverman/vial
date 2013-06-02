@@ -1,5 +1,7 @@
 import sys
 
+from functools import wraps
+
 import vial
 from vial import vim
 
@@ -100,6 +102,16 @@ def get_var(name, default=None):
 def focus_window(winnr):
     vim.command('{}wincmd w'.format(winnr))
 
+def vimfunction(func):
+    from inspect import getargspec
+    args = getargspec(func)[0]
+    def inner():
+        lvars = vim.bindeval('a:')
+        result = func(*[lvars[r] for r in args])
+        lvars['result'] = result 
+
+    inner.func = func
+    return inner
 
 class Func(object):
     def __init__(self):
