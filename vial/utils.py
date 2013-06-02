@@ -97,6 +97,9 @@ def get_var(name, default=None):
     except KeyError:
         return default
 
+def focus_window(winnr):
+    vim.command('{}wincmd w'.format(winnr))
+
 
 class Func(object):
     def __init__(self):
