@@ -51,9 +51,9 @@ def register_function(signature, callback):
     endfunction'''.format(signature, name))
 
 def filetype_changed():
-    ft = vial.vfunc.expand('<amatch>')
-    bufnr = int(vial.vfunc.expand('<abuf>'))
-    buf = get_buf(bufnr)
+    ft = vfunc.expand('<amatch>')
+    bufnr = int(vfunc.expand('<abuf>'))
+    buf = utils.get_buf(bufnr)
     _emit_ft(buf, ft)
 
 def _emit_ft(buf, ft):
