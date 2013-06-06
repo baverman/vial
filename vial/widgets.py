@@ -108,9 +108,9 @@ class SearchDialog(object):
             self.buf = buf
         else:
             if buf:
-                vim.command('keepalt botright sbuffer {}'.format(buf.number))
+                vim.command('silent keepalt botright sbuffer {}'.format(buf.number))
             else:
-                vim.command('keepalt botright split {}'.format(self.name))
+                vim.command('silent keepalt botright split {}'.format(self.name))
                 self.loop = loop.Loop(get_key_code('Plug') + 'l')
                 self.loop.on_key('CR', self._exit, True)
                 self.loop.on_key('Esc', self._exit)
@@ -136,7 +136,9 @@ class SearchDialog(object):
             self._prompt = prompt
 
         self._update_status()
-        self.loop.enter()
+
+        if prompt is not None:
+            self.on_prompt_changed(prompt)
 
     def _exit(self, select=False):
         cursor = self.win.cursor
@@ -173,10 +175,6 @@ class SearchDialog(object):
         self.loop.refresh()
 
     def _update_status(self):
-        if not self._prompt:
-            self.list_view.show_cursor(False)
-            self.buf[0:] = ['Type something to search']
-
         redraw()
         echo(u'>>> {}_'.format(self._prompt))
 

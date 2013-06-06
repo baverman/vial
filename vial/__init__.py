@@ -6,11 +6,22 @@ except ImportError:
     class vim:
         pass
 
+class VimFuncs(object):
+    def __init__(self):
+        self._cache = {}
+
+    def __getattr__(self, name):
+        try:
+            return self._cache[name]
+        except KeyError:
+            pass
+
+        func = self._cache[name] = vim.bindeval('function("{}")'.format(name))
+        return func
+
+vfunc = VimFuncs()
 event = None
 plugin_manager = None
-
-from . import utils
-from . import plugins
 
 def init():
     import logging
@@ -20,7 +31,10 @@ def init():
 
     event = EventManager()
 
-    plugin_manager = plugins.Manager()
+    import vial.utils
+    import vial.plugins
+
+    plugin_manager = vial.plugins.Manager()
     plugin_manager.add_from(vim.eval('&runtimepath').split(','))
     plugin_manager.init()
 
@@ -61,6 +75,7 @@ def _emit_ft(buf, ft):
     for r in ft.split('.'):
         event.emit('filetype:{}'.format(r), buf)
 
+
 class EventManager(object):
     def __init__(self):
         self.callbacks = {}
@@ -72,3 +87,5 @@ class EventManager(object):
 
     def on(self, name, callback):
         self.callbacks.setdefault(name, []).append(callback)
+
+
