@@ -1,9 +1,13 @@
 from time import sleep, time
 
-from . import vfunc
+from . import vfunc 
 from .utils import get_key_code, get_key
 
 TIME_SLICE = 0.02
+
+waiting_loops = []
+def pop():
+    waiting_loops.pop().enter()
 
 class Loop(object):
     def __init__(self, feedkeys):
@@ -27,12 +31,13 @@ class Loop(object):
                         h(key, *a)
             else:
                 t = time()
+                self.reenter = True
                 while self.tasks:
                     task = self.tasks.pop(0)
                     try:
                         next(task)
                     except StopIteration:
-                        pass
+                        self.do_release = True
                     else:
                         self.tasks.append(task)
                    
@@ -45,6 +50,7 @@ class Loop(object):
             if self.do_release:
                 self.do_release = False
                 if self.reenter:
+                    waiting_loops.append(self)
                     vfunc.feedkeys(self.feedkeys)
                 return
 
