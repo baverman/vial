@@ -4,7 +4,15 @@ try:
     import vim
 except ImportError:
     class vim:
-        pass
+        vars = {}
+        vvars = {}
+
+if not hasattr(vim, 'vars'):
+    vim.vars = vim.bindeval('g:')
+
+if not hasattr(vim, 'vvars'):
+    vim.vvars = vim.bindeval('v:')
+
 
 class VimFuncs(object):
     def __init__(self):
