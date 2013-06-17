@@ -38,6 +38,8 @@ def init():
     plugin_manager.add_from(vim.eval('&runtimepath').split(','))
     plugin_manager.init()
 
+    init_session()
+
     vim.command('augroup VialFileType')
     vim.command('autocmd!')
     vim.command('autocmd FileType * python vial.filetype_changed()')
@@ -45,6 +47,17 @@ def init():
 
     for b in vim.buffers:
         _emit_ft(b, vfunc.getbufvar(b.number, '&filetype'))
+
+def init_session():
+    if 'this_session' not in vim.vvars.keys():
+        return
+
+    vial_session_fname = vim.vvars['this_session']
+    if vial_session_fname.endswith('.vim'):
+        vial_session_fname = vial_session_fname[:-4]
+
+    vial_session_fname += 'v.vim'
+    vim.command('silent! source {}'.format(vial_session_fname)) # TODO: escape
 
 def event_received():
     event = vim.eval("a:event")
