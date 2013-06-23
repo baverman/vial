@@ -73,6 +73,12 @@ def get_var(name, default=None):
     except KeyError:
         return default
 
+def get_dvar(name):
+    try:
+        return vim.vars[name]
+    except KeyError:
+        return vim.vars[name + '_default']
+
 def focus_window(winnr):
     vim.command('{}wincmd w'.format(winnr))
 
