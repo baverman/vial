@@ -97,11 +97,12 @@ def _walk(root, top, ignore_files=None, ignore_dirs=None):
         for p in _walk(root, path, ignore_files, ignore_dirs):
             yield p
 
-def get_files(root, cache):
-    try:
-        return cache[root]
-    except KeyError:
-        pass
+def get_files(root, cache=None):
+    if cache is not None:
+        try:
+            return cache[root]
+        except KeyError:
+            pass
 
     ignore_files = re.compile('.*({})$'.format('|'.join(r'\.{}'.format(r)
         for r in get_dvar('vial_ignore_extensions'))))
@@ -115,7 +116,8 @@ def get_files(root, cache):
             fcache.append(r)
             yield r
 
-        cache[root] = fcache
+        if cache is not None:
+            cache[root] = fcache
     
     return filler()
 

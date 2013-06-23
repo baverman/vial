@@ -1,3 +1,4 @@
+import os
 import sys
 
 from functools import wraps
@@ -54,6 +55,9 @@ def get_buf(bufnr):
             return b
     
     return None
+
+def get_projects():
+    return get_var('vial_projects', [os.getcwd()])
 
 def get_winbuf(name):
     win = None

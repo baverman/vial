@@ -44,6 +44,7 @@ def init():
 
     plugin_manager = vial.plugins.Manager()
     plugin_manager.add_from(vim.eval('&runtimepath').split(','))
+    plugin_manager.add('grep')
     plugin_manager.init()
 
     init_session()

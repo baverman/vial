@@ -37,12 +37,15 @@ class Manager(object):
 
     def add_from(self, path):
         for name in find_plugins(path):
-            try:
-                self.add(get_plugin(name))
-            except:
-                log.exception('Plugin import failed')
+            self.add(name)
 
-    def add(self, plugin):
+    def add(self, name):
+        try:
+            self._add(get_plugin(name))
+        except:
+            log.exception('Plugin import failed')
+
+    def _add(self, plugin):
         self.plugins.append(plugin)
 
     def init(self):
