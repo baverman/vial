@@ -15,20 +15,14 @@ def grep(query):
                 matches = matcher.finditer(source)
                 lines = source.splitlines()
 
-            bufnr = None
-
             for m in matches:
-                if not bufnr:
-                    vim.command('badd {}'.format(fullpath))
-                    bufnr = vfunc.bufname(fullpath)
-
                 start = m.start()
                 line = source.count('\n', 0, start) + 1
                 offset = start - source.rfind('\n', 0, start)
                 text = lines[line - 1]
 
                 result.append({
-                    'bufnr': bufnr,
+                    'bufnr': '',
                     'filename': fullpath,
                     'pattern': '',
                     'valid': 1,
