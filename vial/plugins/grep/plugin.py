@@ -35,3 +35,4 @@ def grep(query):
                 })
                 
     vfunc.setqflist(result, 'r')
+    print '{} matches found'.format(len(result))
