@@ -12,10 +12,6 @@ def get_package(name):
         __import__(name)
         return sys.modules[name]
 
-def get_plugin(name):
-    package_name = 'vial.plugins.' + name
-    return get_package(package_name)
-
 def find_plugins(path):
     plugins = []
     for p in path:
@@ -26,7 +22,7 @@ def find_plugins(path):
 
             for name in os.listdir(vp):
                 if os.path.exists(os.path.join(vp, name, '__init__.py')):
-                    plugins.append(name)
+                    plugins.append('vial.plugins.' + name)
     
     return plugins
 
@@ -41,7 +37,7 @@ class Manager(object):
 
     def add(self, name):
         try:
-            self._add(get_plugin(name))
+            self._add(get_package(name))
         except:
             log.exception('Plugin import failed')
 
