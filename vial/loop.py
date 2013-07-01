@@ -1,7 +1,7 @@
 from time import sleep, time
 
-from . import vfunc 
-from .utils import get_key_code, get_key
+from . import vfunc, vim 
+from .utils import get_key_code, get_key, redraw
 
 TIME_SLICE = 0.02
 
@@ -16,8 +16,10 @@ class Loop(object):
         self.do_release = False
         self.reenter = False
         self.feedkeys = feedkeys
+        self.is_lazy = False
 
     def enter(self):
+        self.is_lazy = vim.eval('&lazyredraw')
         while True:
             key, is_special = get_key()
             if key:
@@ -49,9 +51,14 @@ class Loop(object):
 
             if self.do_release:
                 self.do_release = False
+
                 if self.reenter:
                     waiting_loops.append(self)
                     vfunc.feedkeys(self.feedkeys)
+
+                if self.is_lazy:
+                    redraw()
+
                 return
 
     def refresh(self):
