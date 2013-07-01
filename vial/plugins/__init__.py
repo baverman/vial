@@ -1,7 +1,6 @@
 import sys
 import os.path
 import logging
-import weakref
 
 log = logging.getLogger(__name__)
 

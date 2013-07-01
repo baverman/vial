@@ -54,7 +54,7 @@ class ListView(object):
         self.buf = buf
         self.win = win
 
-    def set_columns(sell, *columns):
+    def set_columns(self, *columns):
         self.columns = columns
 
     def clear(self):

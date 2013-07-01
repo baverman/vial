@@ -1,6 +1,6 @@
 import re
 
-from vial import vfunc, vim
+from vial import vfunc
 from vial.fsearch import get_files
 from vial.utils import get_projects
 

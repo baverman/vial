@@ -1,8 +1,6 @@
 import os
 import sys
 
-from functools import wraps
-
 from vial import vim, vfunc
 
 KEY_CACHE = {}
