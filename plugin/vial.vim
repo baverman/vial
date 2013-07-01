@@ -19,14 +19,19 @@ function! VialEmit(event)
 endfunction
 
 function! VialGetKey()
-    if getchar(1)
-	let chr = getchar()
-        if chr != 0
-            let chr = nr2char(chr)
+    try
+        if getchar(1)
+            let chr = getchar()
+            if chr != 0
+                let chr = nr2char(chr)
+            endif
+        else
+            let chr = ''
         endif
-    else
-        let chr = ''
-    endif
+    catch /^Vim:Interrupt$/
+        let chr = "\<esc>"
+    endtry
+
     return chr
 endfunction
 
