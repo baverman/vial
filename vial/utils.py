@@ -128,3 +128,9 @@ def lfunc(name):
 
     inner.__name__ = name
     return inner
+
+NOT_FILE_BUFFER_TYPES = set(('nofile', 'help'))
+def buffer_with_file(buf):
+    return buf.name and \
+        vfunc.getbufvar(buf.number, '&buftype') not in NOT_FILE_BUFFER_TYPES 
+
