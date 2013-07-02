@@ -102,7 +102,7 @@ def get_content(buf=None):
 def get_content_and_offset():
     line, pos = vim.current.window.cursor
     offset = vfunc.line2byte(line) + pos
-    return get_content(), offset
+    return get_content(), offset - 1
 
 def lfunc(name):
     globs = sys._getframe(1).f_globals
