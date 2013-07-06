@@ -30,7 +30,7 @@ def grep(query):
                     'lnum': line,
                     'vcol': 0,
                     'col': offset,
-                    'text': text,
+                    'text': text.replace('\x00', ' '),
                     'type': ''
                 })
                 
