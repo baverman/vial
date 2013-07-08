@@ -1,15 +1,29 @@
+import os
 import re
+
+from time import time
 
 from vial import vfunc
 from vial.fsearch import get_files
-from vial.utils import get_projects
+from vial.utils import get_projects, redraw
+
+MAX_FILESIZE = 10 * 1024 * 1024
 
 def grep(query):
     matcher = re.compile(re.escape(query))
 
+    t = time() - 1
     result = []
     for r in get_projects():
         for name, path, root, top, fullpath in get_files(r):
+            if time() - t >= 1:
+                redraw()
+                print fullpath
+                t = time()
+
+            if os.stat(fullpath).st_size > MAX_FILESIZE:
+                continue
+
             with open(fullpath) as f:
                 source = f.read()
                 matches = matcher.finditer(source)
@@ -35,4 +49,5 @@ def grep(query):
                 })
                 
     vfunc.setqflist(result, 'r')
+    redraw()
     print '{} matches found'.format(len(result))
