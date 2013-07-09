@@ -58,6 +58,8 @@ def grep(query):
 
 @vimfunction
 def grepop(type):
+    old = vfunc.getreg('"')
+
     if type == 'v':
         vim.command('normal! `<v`>y')
     elif type == 'char':
@@ -65,5 +67,11 @@ def grepop(type):
     else:
         return
 
-    query = vfunc.eval('@@')
-    grep(query)
+    query = vfunc.getreg('"')
+    if query.strip():
+        grep(query)
+    else:
+        redraw()
+        print 'Search for nothing?'
+
+    vfunc.setreg('"', old)
