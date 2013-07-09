@@ -81,6 +81,9 @@ def register_command(name, callback, **opts):
 
 def register_function(signature, callback):
     name = signature.partition('(')[0]
+    if name.lower().startswith('<sid>'):
+        name = name[5:]
+
     globals()[name] = callback
     vim.command('''function! {0}
       python vial.{1}()
