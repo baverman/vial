@@ -3,7 +3,7 @@ import re
 
 from time import time
 
-from vial import vfunc
+from vial import vfunc, vim
 from vial.fsearch import get_files
 from vial.utils import get_projects, redraw
 
@@ -49,5 +49,9 @@ def grep(query):
                 })
                 
     vfunc.setqflist(result, 'r')
+
+    if result:
+        vim.command('cw')
+
     redraw()
     print '{} matches found'.format(len(result))
