@@ -90,6 +90,9 @@ def vimfunction(func):
     def inner():
         lvars = vim.bindeval('a:')
         result = func(*[lvars[r] for r in args])
+        if result is None:
+            result = ''
+
         lvars['result'] = result 
 
     inner.func = func
