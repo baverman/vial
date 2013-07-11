@@ -48,7 +48,7 @@ def grep(query):
                     'type': ''
                 })
                 
-    vfunc.setqflist(result, 'r')
+    vfunc.setqflist(result)
 
     if result:
         vim.command('cw')
