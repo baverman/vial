@@ -21,7 +21,10 @@ def grep(query):
                 print fullpath
                 t = time()
 
-            if os.stat(fullpath).st_size > MAX_FILESIZE:
+            try:
+                if os.stat(fullpath).st_size > MAX_FILESIZE:
+                    continue
+            except OSError:
                 continue
 
             with open(fullpath) as f:
