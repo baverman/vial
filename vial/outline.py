@@ -50,6 +50,7 @@ class Outline(SearchDialog):
 
     def on_select(self, item, cursor):
         focus_window(self.last_window)
+        vim.command('normal! m\'')
 
         item = item[0]
         if 'offset' in item:
