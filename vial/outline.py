@@ -13,22 +13,29 @@ def show(items):
 def get_outline(items):
     result = []
 
-    def push_childs(pf, plevel, parent):
+    def push_childs(pf, plevel, parent, la):
         def inner(item):
             level = item['level']
             if level == plevel:
+                if 'dead' in item:
+                    return push_childs(inner, plevel+1, parent, la + 1)
+
                 item['parent'] = parent 
                 item['path'] = parent + (item['name'],)
+                item['level'] -= la
                 result.append(item)
                 return inner
             elif level > plevel:
-                return push_childs(inner, level, result[-1]['path'])(item)
+                if 'dead' in item:
+                    return push_childs(inner, level, parent, la + 1)
+
+                return push_childs(inner, level, result[-1]['path'], la)(item)
             else:
                 return pf(item)
 
         return inner
 
-    pf = push_childs(None, 0, ())
+    pf = push_childs(None, 0, (), 0)
     for item in items:
         pf = pf(item)
 
