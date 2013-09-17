@@ -1,6 +1,6 @@
 from vial import vim, vfunc
 from vial.widgets import SearchDialog, ListFormatter, ListView
-from vial.utils import focus_window
+from vial.utils import focus_window, mark
 
 dialog = None
 def show(items):
@@ -57,7 +57,7 @@ class Outline(SearchDialog):
 
     def on_select(self, item, cursor):
         focus_window(self.last_window)
-        vim.command('normal! m\'')
+        mark()
 
         item = item[0]
         if 'offset' in item:

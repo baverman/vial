@@ -137,3 +137,5 @@ def buffer_with_file(buf):
     return buf.name and vfunc.buflisted(buf.number) and \
         vfunc.getbufvar(buf.number, '&buftype') not in NOT_FILE_BUFFER_TYPES 
 
+def mark(m='\''):
+    vim.command('normal! m' + m)
