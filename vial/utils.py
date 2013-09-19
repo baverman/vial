@@ -1,4 +1,5 @@
 import os
+import re
 import sys
 
 from vial import vim, vfunc
@@ -12,6 +13,13 @@ def get_key_code(key):
 
     code = KEY_CACHE[key] = vfunc.eval('"\<{}>"'.format(key))
     return code
+
+keys_re = re.compile(r'<(.+?)>')
+def replace_key_match(match):
+    return get_key_code(match.group(1))
+
+def parse_keys(keys):
+    return keys_re.sub(replace_key_match, keys)
 
 def get_key():
     c = vfunc.VialGetKey()

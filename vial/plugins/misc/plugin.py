@@ -32,11 +32,9 @@ def indent():
 
     cline = buf[line-1].lstrip() 
     if cline and cline[0] in [')', ']', '}']:
-        return shift_indent(line)
-
-    pline = buf[line-2].rstrip() 
-    if pline and pline[-1] in ['(', '[', '{']:
-        return shift_indent(line)
+        pline = buf[line-2].rstrip() 
+        if pline and pline[-1] in ['(', '[', '{']:
+            return shift_indent(line)
 
     return -1
 
