@@ -139,3 +139,10 @@ def buffer_with_file(buf):
 
 def mark(m='\''):
     vim.command('normal! m' + m)
+
+def get_ws(line):
+    return line[:len(line) - len(line.lstrip())]
+
+def get_ws_len(line):
+    return len(line) - len(line.lstrip())
+
