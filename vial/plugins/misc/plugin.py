@@ -71,7 +71,7 @@ class SearchOutlineDialog(SearchDialog):
 
     def on_prompt_changed(self, prompt):
         if prompt:
-            self.fill(prompt)
+            self.fill(prompt.encode('utf-8'))
         else:
             self.list_view.show_cursor(False)
             self.buf[0:] = ['Type something to search']
