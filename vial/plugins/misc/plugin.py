@@ -67,7 +67,7 @@ class SearchOutlineDialog(SearchDialog):
 
     def on_prompt_changed(self, prompt):
         if prompt:
-            self.fill(prompt.encode('utf-8'))
+            self.fill(prompt)
         else:
             self.list_view.show_cursor(False)
             self.buf[0:] = ['Type something to search']
@@ -77,11 +77,19 @@ class SearchOutlineDialog(SearchDialog):
         current = self.current = object()
         self.list_view.clear()
 
+        ignorecase = prompt == prompt.lower()
+        if ignorecase:
+            prompt = prompt.lower()
+
         for i, line in enumerate(self.sbuf, 1):
             if current is not self.current:
                 return
 
-            if prompt in line:
+            l = line.decode('utf-8')
+            if ignorecase:
+                l = l.lower()
+
+            if prompt in l:
                 self.lines.append((get_ws_len(line), i, str(i), line))
 
         self.lines.sort()
