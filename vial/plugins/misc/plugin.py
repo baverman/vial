@@ -25,7 +25,7 @@ def shift_indent(line, shift=1):
 
 @vimfunction
 def indent():
-    line = vim.current.window.cursor[0]
+    line, pos = vim.current.window.cursor
     buf = vim.current.buffer
     if buf[line-2].endswith(':'):
         return shift_indent(line)
@@ -34,7 +34,11 @@ def indent():
     if pline and pline[-1] in ('(', '[', '{'):
         return shift_indent(line)
 
-    return vfunc.indent(line-1)
+    w = vfunc.indent(line-1)
+    if not buf[line-1].strip() and w != pos:
+        return -1
+
+    return w
 
 search_outline_dialog = None
 def search_outline():
