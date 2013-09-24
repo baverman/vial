@@ -34,7 +34,7 @@ def indent():
     if pline and pline[-1] in ('(', '[', '{'):
         return shift_indent(line)
 
-    return -1
+    return vfunc.indent(line-1)
 
 search_outline_dialog = None
 def search_outline():
