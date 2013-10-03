@@ -10,7 +10,8 @@ def escape():
     
     for n, w in reversed(list(enumerate(vim.windows, 1))):
         if not buffer_with_file(w.buffer):
-            focus_window(n)
+            if not '[Command Line]'in w.buffer.name:
+                focus_window(n)
             vim.command('q')
             if n != cur:
                 if cur > n:
