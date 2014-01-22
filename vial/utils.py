@@ -59,7 +59,7 @@ def get_buf(bufnr):
     for b in vim.buffers:
         if b.number == bufnr:
             return b
-    
+
     return None
 
 def get_projects():
@@ -101,7 +101,7 @@ def vimfunction(func):
         if result is None:
             result = ''
 
-        lvars['result'] = result 
+        lvars['result'] = result
 
     inner.func = func
     return inner

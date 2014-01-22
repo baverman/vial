@@ -46,6 +46,7 @@ def init():
     plugin_manager.add_from(vim.eval('&runtimepath').split(','))
     plugin_manager.add('vial.plugins.grep')
     plugin_manager.add('vial.plugins.misc')
+    plugin_manager.add('vial.plugins.bufhist')
     plugin_manager.init()
 
     init_session()

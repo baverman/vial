@@ -1,13 +1,15 @@
 from vial import vfunc, vim
-from vial.utils import buffer_with_file, focus_window, vimfunction, get_ws_len, mark
+from vial.utils import buffer_with_file, focus_window, vimfunction, get_ws_len, mark, \
+    get_key_code, echo
 from vial.widgets import SearchDialog, ListFormatter, ListView
+
 
 def escape():
     if len(vim.windows) < 2:
         return
 
     cur = vfunc.winnr()
-    
+
     for n, w in reversed(list(enumerate(vim.windows, 1))):
         if not buffer_with_file(w.buffer):
             if not '[Command Line]'in w.buffer.name:
@@ -21,8 +23,10 @@ def escape():
 
             return
 
+
 def shift_indent(line, shift=1):
     return vfunc.indent(line-1) + shift * vfunc.eval('&sw')
+
 
 @vimfunction
 def indent():
@@ -31,7 +35,7 @@ def indent():
     if buf[line-2].endswith(':'):
         return shift_indent(line)
 
-    pline = buf[line-2].rstrip() 
+    pline = buf[line-2].rstrip()
     if pline and pline[-1] in ('(', '[', '{'):
         return shift_indent(line)
 
@@ -41,6 +45,7 @@ def indent():
 
     return w
 
+
 search_outline_dialog = None
 def search_outline():
     global search_outline_dialog
@@ -49,10 +54,11 @@ def search_outline():
 
     search_outline_dialog.open()
 
+
 class SearchOutlineDialog(SearchDialog):
     def __init__(self):
         self.lines = []
-        SearchDialog.__init__(self, '__vial_search_outline__', 
+        SearchDialog.__init__(self, '__vial_search_outline__',
             ListView(self.lines, ListFormatter(2,0, 3,1)))
 
     def open(self):
