@@ -1,6 +1,6 @@
 from time import sleep, time
 
-from . import vfunc, vim 
+from . import vfunc, vim
 from .utils import get_key_code, get_key, redraw
 
 TIME_SLICE = 0.02
@@ -26,7 +26,7 @@ class Loop(object):
                 if is_special:
                     if key in self.handlers:
                         h, a = self.handlers[key]
-                        h(*a)     
+                        h(*a)
                 else:
                     if 'print' in self.handlers:
                         h, a = self.handlers['print']
@@ -42,7 +42,7 @@ class Loop(object):
                         self.do_release = True
                     else:
                         self.tasks.append(task)
-                   
+
                     tt = time()
                     if tt - t > TIME_SLICE:
                         break

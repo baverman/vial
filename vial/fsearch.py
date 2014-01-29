@@ -6,11 +6,13 @@ from os.path import join, isdir
 
 from .utils import get_dvar
 
+
 def name_startswith(what):
     def inner(name, path):
         return name.startswith(what)
 
     return inner
+
 
 def name_endswith(what):
     def inner(name, path):
@@ -18,17 +20,20 @@ def name_endswith(what):
 
     return inner
 
+
 def name_match(what):
     def inner(name, path):
         return what in name
 
     return inner
 
+
 def path_match(what):
     def inner(name, path):
         return what in path
 
     return inner
+
 
 def path_items_startswith(pattern, skip):
     itemsp = pattern.split(os.sep)
@@ -43,10 +48,11 @@ def path_items_startswith(pattern, skip):
         items = items[:len(items) - 1 - skip]
         if len(items) < count:
             return False
-        
+
         return all(i.startswith(ip) for i, ip in zip(items[-count:], itemsp))
 
     return inner
+
 
 def path_items_match(pattern):
     itemsp = pattern.split(os.sep)
@@ -65,6 +71,7 @@ def path_items_match(pattern):
 
     return inner
 
+
 def get_matchers(pattern):
     if pattern.startswith('.'):
         return name_endswith(pattern), name_startswith(pattern),\
@@ -74,6 +81,7 @@ def get_matchers(pattern):
             path_items_match(pattern), path_match(pattern) 
 
     return name_startswith(pattern), name_match(pattern), path_match(pattern)
+
 
 def _walk(root, top, ignore_files=None, ignore_dirs=None):
     dirs_to_visit = []
@@ -97,6 +105,7 @@ def _walk(root, top, ignore_files=None, ignore_dirs=None):
         for p in _walk(root, path, ignore_files, ignore_dirs):
             yield p
 
+
 def get_files(root, cache=None):
     if cache is not None:
         try:
@@ -118,6 +127,6 @@ def get_files(root, cache=None):
 
         if cache is not None:
             cache[root] = fcache
-    
+
     return filler()
 

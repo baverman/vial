@@ -1,37 +1,52 @@
+import time
+from itertools import groupby
+
 from vial import vfunc, vim
-from vial.utils import echo
+from vial.utils import echon, redraw
+from os.path import split
 
 MAX_HISTORY_SIZE = 100
 VHIST = 'vial_buf_hist'
-VPOS = 'vial_buf_pos'
-VSWITCH = 'vial_buf_switch'
+VLAST = 'vial_last_buf'
 
-def delete_from_history():
-    bufnr = int(vfunc.expand('<abuf>'))
+TIMEOUT = 1
+WIDTH = -20
 
+
+def delete_from_history(bufnr):
     for w in vim.windows:
         if VHIST in w.vars:
             w.vars[VHIST] = [r for r in w.vars[VHIST] if r != bufnr]
 
 
-def add_to_history():
+def add_to_history(w, bufnr):
+    history = list(w.vars[VHIST])
+    history[:] = [r for r in history if r != bufnr][:MAX_HISTORY_SIZE - 1]
+    history.insert(0, bufnr)
+    w.vars[VHIST] = history
+    return history
+
+
+def check_history(window):
+    if not VHIST in window.vars:
+        bufnr = vim.current.buffer.number
+        history = [r.number for r in vim.buffers if r.number != bufnr]
+        history.reverse()
+        history.insert(0, bufnr)
+        window.vars[VHIST] = history
+
+
+def win_buf_enter():
     w = vim.current.window
-
-    if w.vars.get(VSWITCH, None):
-        return
-
-    history = list(w.vars.get(VHIST, []))
-
+    check_history(w)
     bufnr = int(vfunc.expand('<abuf>'))
 
-    history[:] = [r for r in history if r != bufnr]
-    history.insert(0, bufnr)
+    now = time.time()
+    lastbuf = w.vars.get(VLAST, None)
+    if lastbuf and now - lastbuf[1] > 2:
+        add_to_history(w, lastbuf[0])
 
-    while len(history) > MAX_HISTORY_SIZE:
-        history.pop()
-
-    w.vars[VHIST] = history
-    w.vars[VPOS] = 0
+    w.vars[VLAST] = [bufnr, now]
 
 
 def next():
@@ -41,23 +56,80 @@ def next():
 def prev():
     jump(1)
 
+skey = lambda r: r[1][1]
 
 def jump(dir):
     w = vim.current.window
-    pos = w.vars.get(VPOS, 0)
-    hist = w.vars.get(VHIST, [])
+    check_history(w)
+    history = list(w.vars[VHIST])
 
-    pos += dir
-    if pos < 0:
-        echo('Bufhist start')
-        w.vars[VPOS] = 0
-        return
-    elif pos >= len(hist):
-        echo('Bufhist end')
-        w.vars[VPOS] = len(hist) - 1
-        return
+    bufnr = vim.current.buffer.number
 
-    w.vars[VPOS] = pos
-    w.vars[VSWITCH] = True
-    vim.command('buffer {}'.format(hist[pos]))
-    w.vars[VSWITCH] = False
+    now = time.time()
+    lastbuf = w.vars.get(VLAST, None)
+    if lastbuf and bufnr == lastbuf[0] and now - lastbuf[1] > 2:
+        history = add_to_history(w, bufnr)
+
+    if not bufnr in history:
+        history = add_to_history(w, bufnr)
+
+    names = {r.number: split(r.name) for r in vim.buffers if vfunc.buflisted(r.number)}
+    history[:] = filter(lambda r: r in names, history)
+
+    dups = True
+    while dups:
+        dups = False
+        for name, g in groupby(sorted(names.iteritems(), key=skey), skey):
+            g = list(g)
+            if len(g) > 1:
+                dups = True
+                for nr, (path, _) in g:
+                    p, n = split(path)
+                    names[nr] = p, n + '/' + name
+
+    if WIDTH < 0:
+        width = int(vim.eval('&columns')) - 1 + WIDTH
+    else:
+        width = WIDTH
+
+    idx = history.index(bufnr)
+    idx += dir
+
+    if idx < 0:
+        idx = 0
+    elif idx >= len(history):
+        idx = len(history) - 1
+
+    anr = history[idx]
+    active = names[anr][1]
+    before = ' '.join(names[r][1] for r in history[:idx])
+    after = ' '.join(names[r][1] for r in history[idx+1:])
+
+    half = (width - len(active) - 2) / 2
+    if len(before) < len(after):
+        blen = min(half, len(before))
+        alen = width - len(active) - blen -2
+    else:
+        alen = min(half, len(after))
+        blen = width - len(active) - alen -2
+
+    if len(before) > blen:
+        before = '...' + before[3-blen:]
+    if len(after) > alen:
+        after = after[:alen-3] + '...'
+
+    if before: before += ' '
+    if after: after = ' ' + after
+
+    if anr != bufnr:
+        vim.command('silent b {}'.format(anr))
+
+    vim.command('let x=&ruler | let y=&showcmd')
+    vim.command('set noruler noshowcmd')
+    redraw()
+    echon(before)
+    vim.command('echohl PmenuSel')
+    echon(active)
+    vim.command('echohl None')
+    echon(after)
+    vim.command('let &ruler=x | let &showcmd=y')

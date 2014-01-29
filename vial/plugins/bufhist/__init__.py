@@ -1,7 +1,7 @@
 import vial
 from vial.utils import lfunc
 
-add_to_history = lfunc('.plugin.add_to_history')
+win_buf_enter = lfunc('.plugin.win_buf_enter')
 delete_from_history = lfunc('.plugin.delete_from_history')
 
 def init():
@@ -10,6 +10,6 @@ def init():
 
     vial.vim.command('augroup VialBufHist')
     vial.vim.command('autocmd!')
-    vial.vim.command('autocmd BufWinEnter * python vial.plugins.bufhist.add_to_history()')
-    vial.vim.command('autocmd BufDelete * python vial.plugins.bufhist.delete_from_history()')
+    vial.vim.command('autocmd BufWinEnter * python vial.plugins.bufhist.win_buf_enter()')
+    # vial.vim.command('autocmd BufDelete * python vial.plugins.bufhist.delete_from_history()')
     vial.vim.command('augroup END')

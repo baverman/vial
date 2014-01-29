@@ -14,12 +14,15 @@ def get_key_code(key):
     code = KEY_CACHE[key] = vfunc.eval('"\<{}>"'.format(key))
     return code
 
+
 keys_re = re.compile(r'<(.+?)>')
 def replace_key_match(match):
     return get_key_code(match.group(1))
 
+
 def parse_keys(keys):
     return keys_re.sub(replace_key_match, keys)
+
 
 def get_key():
     c = vfunc.VialGetKey()
@@ -35,6 +38,7 @@ def get_key():
 
     return c, is_special
 
+
 def redraw(clear=False):
     cmd = 'redraw'
     if clear:
@@ -42,11 +46,13 @@ def redraw(clear=False):
 
     vim.command(cmd)
 
+
 def bytestr(string):
     if isinstance(string, unicode):
         string = string.encode('utf-8')
 
     return string
+
 
 def echo(message=None):
     if message:
@@ -55,6 +61,13 @@ def echo(message=None):
     else:
         vim.command('echo')
 
+
+def echon(message=None):
+    if message:
+        message = bytestr(message).replace("'", "''")
+        vim.command("echon '{}'".format(message))
+
+
 def get_buf(bufnr):
     for b in vim.buffers:
         if b.number == bufnr:
@@ -62,8 +75,10 @@ def get_buf(bufnr):
 
     return None
 
+
 def get_projects():
     return get_var('vial_projects', [os.getcwd()])
+
 
 def get_winbuf(name):
     win = None
@@ -77,11 +92,13 @@ def get_winbuf(name):
 
     return win, buf
 
+
 def get_var(name, default=None):
     try:
         return vim.vars[name]
     except KeyError:
         return default
+
 
 def get_dvar(name):
     try:
@@ -89,8 +106,10 @@ def get_dvar(name):
     except KeyError:
         return vim.vars[name + '_default']
 
+
 def focus_window(winnr):
     vim.command('{}wincmd w'.format(winnr))
+
 
 def vimfunction(func):
     from inspect import getargspec
@@ -106,14 +125,17 @@ def vimfunction(func):
     inner.func = func
     return inner
 
+
 def get_content(buf=None):
     buf = buf or vim.current.buffer
     return '\n'.join(buf[:])
+
 
 def get_content_and_offset():
     line, pos = vim.current.window.cursor
     offset = vfunc.line2byte(line) + pos
     return get_content(), offset - 1
+
 
 def lfunc(name):
     globs = sys._getframe(1).f_globals
@@ -140,16 +162,20 @@ def lfunc(name):
     inner.__name__ = name
     return inner
 
+
 NOT_FILE_BUFFER_TYPES = set(('nofile', 'help'))
 def buffer_with_file(buf):
     return buf.name and vfunc.buflisted(buf.number) and \
         vfunc.getbufvar(buf.number, '&buftype') not in NOT_FILE_BUFFER_TYPES 
 
+
 def mark(m='\''):
     vim.command('normal! m' + m)
 
+
 def get_ws(line):
     return line[:len(line) - len(line.lstrip())]
+
 
 def get_ws_len(line):
     return len(line) - len(line.lstrip())

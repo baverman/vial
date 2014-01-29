@@ -1,6 +1,7 @@
 from . import vim, loop
 from .utils import get_key_code, get_winbuf, echo, redraw
 
+
 class ListFormatter(object):
     def __init__(self, *args):
         self.columns = []
@@ -36,12 +37,13 @@ class ListFormatter(object):
 
     def reset(self):
         self.widths = [0] * len(self.columns)
-    
+
     def render(self, items):
         fmt = self.spacing.join('{{{}:<{}}}'.format(f[0], w) for f, w in zip(self.columns, self.widths))
 
         for r in items:
             yield fmt.format(*r)
+
 
 class ListView(object):
     def __init__(self, items, formatter):
@@ -93,17 +95,18 @@ class ListView(object):
         elif not self.cursor_visible:
             vim.command('setlocal cursorline')
             self.cursor_visible = True
-    
+
 
 class SearchDialog(object):
     def __init__(self, name, list_view):
         self.name = name
         self.list_view = list_view
         self._prompt = u''
+        self.loop = None
 
     def show(self, prompt=None):
         win, buf = get_winbuf(self.name)
-        if win:
+        if win and self.loop:
             self.win = win
             self.buf = buf
         else:

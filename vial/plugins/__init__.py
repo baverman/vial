@@ -4,12 +4,14 @@ import logging
 
 log = logging.getLogger(__name__)
 
+
 def get_package(name):
     try:
         return sys.modules[name]
     except KeyError:
         __import__(name)
         return sys.modules[name]
+
 
 def find_plugins(path):
     plugins = []
@@ -22,7 +24,7 @@ def find_plugins(path):
             for name in os.listdir(vp):
                 if os.path.exists(os.path.join(vp, name, '__init__.py')):
                     plugins.append('vial.plugins.' + name)
-    
+
     return plugins
 
 
