@@ -56,8 +56,8 @@ def next():
 def prev():
     jump(1)
 
-skey = lambda r: r[1][1]
 
+skey = lambda r: r[1][1]
 def jump(dir):
     w = vim.current.window
     check_history(w)
@@ -102,34 +102,34 @@ def jump(dir):
 
     anr = history[idx]
     active = names[anr][1]
-    before = ' '.join(names[r][1] for r in history[:idx])
-    after = ' '.join(names[r][1] for r in history[idx+1:])
+    before = '  '.join(names[r][1] for r in history[:idx])
+    after = '  '.join(names[r][1] for r in history[idx+1:])
 
-    half = (width - len(active) - 2) / 2
+    half = (width - len(active) - 4) / 2
     if len(before) < len(after):
         blen = min(half, len(before))
-        alen = width - len(active) - blen -2
+        alen = width - len(active) - blen - 4
     else:
         alen = min(half, len(after))
-        blen = width - len(active) - alen -2
+        blen = width - len(active) - alen - 4
 
     if len(before) > blen:
         before = '...' + before[3-blen:]
     if len(after) > alen:
         after = after[:alen-3] + '...'
 
-    if before: before += ' '
-    if after: after = ' ' + after
-
-    if anr != bufnr:
-        vim.command('silent b {}'.format(anr))
+    if before: before += '  '
+    if after: after = '  ' + after
 
     vim.command('let x=&ruler | let y=&showcmd')
     vim.command('set noruler noshowcmd')
     redraw()
     echon(before)
-    vim.command('echohl PmenuSel')
+    vim.command('echohl CursorLine')
     echon(active)
     vim.command('echohl None')
     echon(after)
     vim.command('let &ruler=x | let &showcmd=y')
+
+    if anr != bufnr:
+        vim.command('silent b {}'.format(anr))
