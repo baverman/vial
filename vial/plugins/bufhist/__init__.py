@@ -1,15 +1,17 @@
-import vial
+from vial import vim
 from vial.utils import lfunc
 
 win_buf_enter = lfunc('.plugin.win_buf_enter')
-delete_from_history = lfunc('.plugin.delete_from_history')
+jump = lfunc('.plugin.jump')
 
 def init():
-    vial.register_command('VialBufHistNext', lfunc('.plugin.next'))
-    vial.register_command('VialBufHistPrev', lfunc('.plugin.prev'))
+    vim.vars['vial_bufhist_timeout'] = 2 # seconds
+    vim.vars['vial_bufhist_width'] = -20
 
-    vial.vim.command('augroup VialBufHist')
-    vial.vim.command('autocmd!')
-    vial.vim.command('autocmd BufWinEnter * python vial.plugins.bufhist.win_buf_enter()')
-    # vial.vim.command('autocmd BufDelete * python vial.plugins.bufhist.delete_from_history()')
-    vial.vim.command('augroup END')
+    vim.command('noremap <silent> <Plug>VialBufHistPrev :python vial.plugins.bufhist.jump(1)<cr>')
+    vim.command('noremap <silent> <Plug>VialBufHistNext :python vial.plugins.bufhist.jump(-1)<cr>')
+
+    vim.command('augroup VialBufHist')
+    vim.command('autocmd!')
+    vim.command('autocmd BufWinEnter * python vial.plugins.bufhist.win_buf_enter()')
+    vim.command('augroup END')

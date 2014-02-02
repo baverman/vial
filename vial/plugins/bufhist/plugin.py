@@ -1,4 +1,4 @@
-import time
+from time import time
 from itertools import groupby
 
 from vial import vfunc, vim
@@ -8,9 +8,6 @@ from os.path import split
 MAX_HISTORY_SIZE = 100
 VHIST = 'vial_buf_hist'
 VLAST = 'vial_last_buf'
-
-TIMEOUT = 1
-WIDTH = -20
 
 
 def delete_from_history(bufnr):
@@ -41,20 +38,12 @@ def win_buf_enter():
     check_history(w)
     bufnr = int(vfunc.expand('<abuf>'))
 
-    now = time.time()
+    now = time()
     lastbuf = w.vars.get(VLAST, None)
-    if lastbuf and now - lastbuf[1] > 2:
+    if lastbuf and now - lastbuf[1] > vim.vars['vial_bufhist_timeout']:
         add_to_history(w, lastbuf[0])
 
     w.vars[VLAST] = [bufnr, now]
-
-
-def next():
-    jump(-1)
-
-
-def prev():
-    jump(1)
 
 
 skey = lambda r: r[1][1]
@@ -65,15 +54,17 @@ def jump(dir):
 
     bufnr = vim.current.buffer.number
 
-    now = time.time()
+    now = time()
     lastbuf = w.vars.get(VLAST, None)
-    if lastbuf and bufnr == lastbuf[0] and now - lastbuf[1] > 2:
+    if lastbuf and bufnr == lastbuf[0] and \
+            now - lastbuf[1] > vim.vars['vial_bufhist_timeout']:
         history = add_to_history(w, bufnr)
 
     if not bufnr in history:
         history = add_to_history(w, bufnr)
 
-    names = {r.number: split(r.name) for r in vim.buffers if vfunc.buflisted(r.number)}
+    names = {r.number: split(r.name)
+        for r in vim.buffers if vfunc.buflisted(r.number)}
     history[:] = filter(lambda r: r in names, history)
 
     dups = True
@@ -87,10 +78,9 @@ def jump(dir):
                     p, n = split(path)
                     names[nr] = p, n + '/' + name
 
-    if WIDTH < 0:
-        width = int(vim.eval('&columns')) - 1 + WIDTH
-    else:
-        width = WIDTH
+    width = vim.vars['vial_bufhist_width']
+    if width < 0:
+        width += int(vim.eval('&columns')) - 1
 
     idx = history.index(bufnr)
     idx += dir
@@ -133,3 +123,7 @@ def jump(dir):
 
     if anr != bufnr:
         vim.command('silent b {}'.format(anr))
+        # vim.command('augroup vial_bufhist_wait_action')
+        # vim.command('au!')
+        # vim.command('au CursorMoved <buffer> let
+        # vim.command('augroup END')
