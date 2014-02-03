@@ -10,12 +10,6 @@ VHIST = 'vial_buf_hist'
 VLAST = 'vial_last_buf'
 
 
-def delete_from_history(bufnr):
-    for w in vim.windows:
-        if VHIST in w.vars:
-            w.vars[VHIST] = [r for r in w.vars[VHIST] if r != bufnr]
-
-
 def add_to_history(w, bufnr):
     history = list(w.vars[VHIST])
     history[:] = [r for r in history if r != bufnr][:MAX_HISTORY_SIZE - 1]
@@ -35,15 +29,14 @@ def check_history(window):
 
 def win_buf_enter():
     w = vim.current.window
-    check_history(w)
     bufnr = int(vfunc.expand('<abuf>'))
 
-    now = time()
-    lastbuf = w.vars.get(VLAST, None)
-    if lastbuf and now - lastbuf[1] > vim.vars['vial_bufhist_timeout']:
-        add_to_history(w, lastbuf[0])
-
-    w.vars[VLAST] = [bufnr, now]
+    if not w.vars.get('vial_bufhist_switch', None):
+        check_history(w)
+        add_to_history(w, bufnr)
+        w.vars[VLAST] = 0
+    else:
+        w.vars[VLAST] = bufnr, time()
 
 
 skey = lambda r: r[1][1]
@@ -122,7 +115,9 @@ def jump(dir):
     vim.command('let &ruler=x | let &showcmd=y')
 
     if anr != bufnr:
+        w.vars['vial_bufhist_switch'] = 1
         vim.command('silent b {}'.format(anr))
+        w.vars['vial_bufhist_switch'] = 0
         # vim.command('augroup vial_bufhist_wait_action')
         # vim.command('au!')
         # vim.command('au CursorMoved <buffer> let
