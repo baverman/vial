@@ -39,6 +39,15 @@ def win_buf_enter():
         w.vars[VLAST] = bufnr, time()
 
 
+def moved():
+    now = time()
+    w = vim.current.window
+    lastbuf = w.vars.get(VLAST, None)
+    if not lastbuf or now - lastbuf[1] > 0.1:
+        w.vars[VLAST] = 0
+        vim.command('echo "" | au! vial_bufhist_wait_action')
+
+
 skey = lambda r: r[1][1]
 def jump(dir):
     w = vim.current.window
@@ -49,8 +58,8 @@ def jump(dir):
 
     now = time()
     lastbuf = w.vars.get(VLAST, None)
-    if lastbuf and bufnr == lastbuf[0] and \
-            now - lastbuf[1] > vim.vars['vial_bufhist_timeout']:
+    if not lastbuf or (bufnr == lastbuf[0] and
+            now - lastbuf[1] > vim.vars['vial_bufhist_timeout']):
         history = add_to_history(w, bufnr)
 
     if not bufnr in history:
@@ -118,7 +127,7 @@ def jump(dir):
         w.vars['vial_bufhist_switch'] = 1
         vim.command('silent b {}'.format(anr))
         w.vars['vial_bufhist_switch'] = 0
-        # vim.command('augroup vial_bufhist_wait_action')
-        # vim.command('au!')
-        # vim.command('au CursorMoved <buffer> let
-        # vim.command('augroup END')
+        vim.command('augroup vial_bufhist_wait_action')
+        vim.command('au!')
+        vim.command('au CursorMoved,CursorHold <buffer> python vial.plugins.bufhist.plugin.moved()')
+        vim.command('augroup END')
