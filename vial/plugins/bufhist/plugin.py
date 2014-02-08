@@ -1,7 +1,7 @@
 from time import time
 from itertools import groupby
 
-from vial import vfunc, vim
+from vial import vfunc, vim, dref
 from vial.utils import echon, redraw
 from os.path import split
 
@@ -39,6 +39,7 @@ def win_buf_enter():
         w.vars[VLAST] = bufnr, time()
 
 
+@dref
 def moved():
     now = time()
     w = vim.current.window
@@ -127,7 +128,8 @@ def jump(dir):
         w.vars['vial_bufhist_switch'] = 1
         vim.command('silent b {}'.format(anr))
         w.vars['vial_bufhist_switch'] = 0
-        vim.command('augroup vial_bufhist_wait_action')
-        vim.command('au!')
-        vim.command('au CursorMoved,CursorHold <buffer> python vial.plugins.bufhist.plugin.moved()')
-        vim.command('augroup END')
+
+    vim.command('augroup vial_bufhist_wait_action')
+    vim.command('au!')
+    vim.command('au CursorMoved,CursorHold <buffer> python %s()' % moved.ref)
+    vim.command('augroup END')

@@ -137,19 +137,18 @@ def get_content_and_offset():
     return get_content(), offset - 1
 
 
-def lfunc(name):
-    globs = sys._getframe(1).f_globals
+def lfunc(name, depth=0):
+    module_name, _, func_name = name.rpartition('.')
+    if module_name.startswith('.'):
+        globs = sys._getframe(1 + depth).f_globals
+        module_name = globs['__package__'] + module_name
+
     def inner(*args, **kwargs):
         try:
             func = inner.func
         except AttributeError:
-            module, _, func_name = name.rpartition('.')
-            module_name = module.lstrip('.')
-            level = len(module) - len(module_name)
-
-            module = __import__(module_name, globals=globs, level=level)
-            if not level:
-                module = sys.modules[module_name]
+            module = __import__(module_name)
+            module = sys.modules[module_name]
 
             try:
                 func = inner.func = getattr(module, func_name)
@@ -159,14 +158,16 @@ def lfunc(name):
 
         return func(*args, **kwargs)
 
-    inner.__name__ = name
+    inner.__name__ = func_name
+    inner.__module__ = module_name
+    inner.is_lazy = True
     return inner
 
 
 NOT_FILE_BUFFER_TYPES = set(('nofile', 'help'))
 def buffer_with_file(buf):
     return buf.name and vfunc.buflisted(buf.number) and \
-        vfunc.getbufvar(buf.number, '&buftype') not in NOT_FILE_BUFFER_TYPES 
+        vfunc.getbufvar(buf.number, '&buftype') not in NOT_FILE_BUFFER_TYPES
 
 
 def mark(m='\''):

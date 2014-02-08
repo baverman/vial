@@ -27,9 +27,12 @@ class VimFuncs(object):
         func = self._cache[name] = vim.bindeval('function("{}")'.format(name))
         return func
 
+
 vfunc = VimFuncs()
 event = None
 plugin_manager = None
+refs = {}
+
 
 def init():
     import logging
@@ -59,6 +62,7 @@ def init():
     for b in vim.buffers:
         _emit_ft(b, vfunc.getbufvar(b.number, '&filetype'))
 
+
 def init_session():
     if 'this_session' not in vim.vvars.keys():
         return
@@ -70,15 +74,18 @@ def init_session():
     vial_session_fname += 'v.vim'
     vim.command('silent! source {}'.format(vial_session_fname)) # TODO: escape
 
+
 def event_received():
     event = vim.eval("a:event")
     # print(event)
+
 
 def register_command(name, callback, **opts):
     globals()[name] = callback
     fargs = '' if opts.get('nargs', 0) < 1 else '<f-args>'
     opts = ' '.join('-{}={}'.format(*r) for r in opts.iteritems())
     vim.command('''command! {1} {0} python vial.{0}({2})'''.format(name, opts, fargs))
+
 
 def register_function(signature, callback):
     name = signature.partition('(')[0]
@@ -91,11 +98,13 @@ def register_function(signature, callback):
       return a:result
     endfunction'''.format(signature, name))
 
+
 def filetype_changed():
     ft = vfunc.expand('<amatch>')
     bufnr = int(vfunc.expand('<abuf>'))
     buf = utils.get_buf(bufnr)
     _emit_ft(buf, ft)
+
 
 def _emit_ft(buf, ft):
     event.emit('filetype', buf, ft)
@@ -116,3 +125,29 @@ class EventManager(object):
         self.callbacks.setdefault(name, []).append(callback)
 
 
+class ref(object):
+    def __init__(self, fn):
+        if isinstance(fn, basestring):
+            fn = utils.lfunc(fn, 1)
+
+        if hasattr(fn, 'is_lazy'):
+            line = 'lazy'
+        else:
+            line = fn.__code__.co_firstlineno
+
+        name = '{}.{}:{}'.format(
+            fn.__module__, fn.__name__, line)
+
+        refs[name] = fn
+        self.name = name
+
+    def __call__(self, *args, **kwargs):
+        return refs[self.name](*args, **kwargs)
+
+    def __str__(self):
+        return "vial.refs['{}']".format(self.name)
+
+
+def dref(func):
+    func.ref = ref(func)
+    return func
