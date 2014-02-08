@@ -1,6 +1,10 @@
+import os.path
+
+from subprocess import Popen, PIPE
+
 from vial import vfunc, vim
-from vial.utils import buffer_with_file, focus_window, vimfunction, get_ws_len, mark, \
-    get_key_code, echo
+from vial.utils import buffer_with_file, focus_window, vimfunction, \
+    get_ws_len, mark, get_key_code, echo, get_projects
 from vial.widgets import SearchDialog, ListFormatter, ListView
 
 
@@ -106,3 +110,29 @@ class SearchOutlineDialog(SearchDialog):
         self.lines.sort()
         self.list_view.render()
         self.loop.refresh()
+
+
+def changed_projects():
+    changed = []
+    for p in get_projects():
+        if not os.path.exists(os.path.join(p, '.git')):
+            continue
+
+        proc = Popen(['git', 'status', '-b', '--porcelain'], cwd=p, stdout=PIPE, stderr=PIPE)
+        out, err = proc.communicate()
+
+        if proc.returncode != 0:
+            if err.strip():
+                print err
+            else:
+                print 'Git error', proc.returncode
+        else:
+            for line in out.splitlines():
+                if not line.startswith('##') or 'ahead' in line:
+                    changed.append(p)
+                    break
+
+    if changed:
+        print ', '.join(os.path.basename(r) for r in changed)
+    else:
+        echo('There are no any changes')

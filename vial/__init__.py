@@ -81,22 +81,17 @@ def event_received():
 
 
 def register_command(name, callback, **opts):
-    globals()[name] = callback
     fargs = '' if opts.get('nargs', 0) < 1 else '<f-args>'
     opts = ' '.join('-{}={}'.format(*r) for r in opts.iteritems())
-    vim.command('''command! {1} {0} python vial.{0}({2})'''.format(name, opts, fargs))
+    vim.command('''command! {1} {0} python {2}({3})'''.format(
+        name, opts, ref(callback, 1), fargs))
 
 
 def register_function(signature, callback):
-    name = signature.partition('(')[0]
-    if name.lower().startswith('<sid>'):
-        name = name[5:]
-
-    globals()[name] = callback
     vim.command('''function! {0}
-      python vial.{1}()
+      python {1}()
       return a:result
-    endfunction'''.format(signature, name))
+    endfunction'''.format(signature, ref(callback, 1)))
 
 
 def filetype_changed():
@@ -126,10 +121,13 @@ class EventManager(object):
 
 
 class ref(object):
-    def __init__(self, fn):
+    def __init__(self, fn, depth=0):
         if isinstance(fn, basestring):
-            fn = utils.lfunc(fn, 1)
+            fn = utils.lfunc(fn, depth + 1)
 
+        ofn = fn
+
+        fn = getattr(fn, 'func', fn)
         if hasattr(fn, 'is_lazy'):
             line = 'lazy'
         else:
@@ -138,8 +136,8 @@ class ref(object):
         name = '{}.{}:{}'.format(
             fn.__module__, fn.__name__, line)
 
-        refs[name] = fn
         self.name = name
+        refs[name] = ofn
 
     def __call__(self, *args, **kwargs):
         return refs[self.name](*args, **kwargs)

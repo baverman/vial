@@ -1,5 +1,5 @@
 from . import vim, loop
-from .utils import get_key_code, get_winbuf, echo, redraw
+from .utils import get_key_code, get_winbuf, echo, redraw, focus_window
 
 
 class ListFormatter(object):
@@ -98,8 +98,9 @@ class ListView(object):
 
 
 class SearchDialog(object):
-    def __init__(self, name, list_view):
+    def __init__(self, name, list_view, title=None):
         self.name = name
+        self.title = title or name
         self.list_view = list_view
         self._prompt = u''
         self.loop = None
@@ -115,18 +116,20 @@ class SearchDialog(object):
             else:
                 vim.command('silent keepalt botright split {}'.format(self.name))
                 self.loop = loop.Loop(get_key_code('Plug') + 'l')
-                self.loop.on_key('CR', self._exit, True)
-                self.loop.on_key('Esc', self._exit)
-                self.loop.on_key('Up', self._move_cursor, -1)
-                self.loop.on_key('C-K', self._move_cursor, -1)
-                self.loop.on_key('C-P', self._move_cursor, -1)
+                self.loop.on_key('CR',   self._exit, True)
+                self.loop.on_key('Esc',  self._exit)
+                self.loop.on_key('C-L',  self._select)
+                self.loop.on_key('Up',   self._move_cursor, -1)
+                self.loop.on_key('C-K',  self._move_cursor, -1)
+                self.loop.on_key('C-P',  self._move_cursor, -1)
                 self.loop.on_key('Down', self._move_cursor, 1)
-                self.loop.on_key('C-J', self._move_cursor, 1)
-                self.loop.on_key('C-N', self._move_cursor, 1)
-                self.loop.on_key('BS', self._prompt_changed, None)
+                self.loop.on_key('C-J',  self._move_cursor, 1)
+                self.loop.on_key('C-N',  self._move_cursor, 1)
+                self.loop.on_key('BS',   self._prompt_changed, None)
                 self.loop.on_printable(self._prompt_changed)
 
                 vim.command('setlocal buftype=nofile noswapfile nonumber colorcolumn=')
+                vim.command('setlocal stl={}'.format(self.title))
                 vim.command('noremap <buffer> <silent> <Plug>l :python vial.loop.pop()<CR>')
 
             self.buf = vim.current.buffer
@@ -142,6 +145,17 @@ class SearchDialog(object):
 
         if prompt is not None:
             self.on_prompt_changed(prompt)
+
+    def _select(self):
+        cursor = self.win.cursor
+        try:
+            item = self.list_view.items[cursor[0] - 1]
+        except IndexError:
+            return
+
+        self.on_select(item, cursor)
+        focus_window(self.win.number)
+        self._update_status()
 
     def _exit(self, select=False):
         cursor = self.win.cursor

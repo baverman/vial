@@ -1,8 +1,9 @@
 import vial
-from vial.utils import lfunc
 
 def init():
-    vial.register_command('VialEscape', lfunc('.plugin.escape'))
-    vial.register_command('VialSearchOutline', lfunc('.plugin.search_outline'))
+    vial.register_command('VialEscape', '.plugin.escape')
+    vial.register_command('VialSearchOutline', '.plugin.search_outline')
 
-    vial.register_function('VialIndent()', lfunc('.plugin.indent'))
+    vial.register_function('VialIndent()', '.plugin.indent')
+
+    vial.register_command('VialChangedProjects', '.plugin.changed_projects')
