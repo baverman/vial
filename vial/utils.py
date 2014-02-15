@@ -76,14 +76,18 @@ def get_buf(bufnr):
     return None
 
 
+def get_buf_by_name(name):
+    num = vfunc.bufnr(name)
+    return get_buf(num)
+
+
 def get_projects():
     return get_var('vial_projects', [os.getcwd()])
 
 
 def get_winbuf(name):
     win = None
-    num = vfunc.bufnr(name)
-    buf = get_buf(num)
+    buf = get_buf_by_name(name)
     if buf:
         for w in vim.windows:
             if w.buffer == buf:
