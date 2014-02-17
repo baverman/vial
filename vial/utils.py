@@ -112,6 +112,7 @@ def get_dvar(name):
 
 
 def focus_window(winnr):
+    winnr = getattr(winnr, 'number', winnr)
     vim.command('{}wincmd w'.format(winnr))
 
 
