@@ -105,37 +105,24 @@ class SearchDialog(object):
         self._prompt = u''
         self.loop = None
 
+    def init(self, win, buf):
+        self.win, self.buf = win, buf
+        self.loop = loop.Loop(get_key_code('Plug') + 'l')
+        self.loop.on_key('CR',   self._exit, True)
+        self.loop.on_key('Esc',  self._exit)
+        self.loop.on_key('C-L',  self._select)
+        self.loop.on_key('Up',   self._move_cursor, -1)
+        self.loop.on_key('C-K',  self._move_cursor, -1)
+        self.loop.on_key('C-P',  self._move_cursor, -1)
+        self.loop.on_key('Down', self._move_cursor, 1)
+        self.loop.on_key('C-J',  self._move_cursor, 1)
+        self.loop.on_key('C-N',  self._move_cursor, 1)
+        self.loop.on_key('BS',   self._prompt_changed, None)
+        self.loop.on_printable(self._prompt_changed)
+        vim.command('noremap <buffer> <silent> <Plug>l :python vial.loop.pop()<CR>')
+
     def show(self, prompt=None):
-        win, buf = get_winbuf(self.name)
-        if win and self.loop:
-            self.win = win
-            self.buf = buf
-        else:
-            if buf:
-                vim.command('silent keepalt botright sbuffer {}'.format(buf.number))
-            else:
-                vim.command('silent keepalt botright split {}'.format(self.name))
-                self.loop = loop.Loop(get_key_code('Plug') + 'l')
-                self.loop.on_key('CR',   self._exit, True)
-                self.loop.on_key('Esc',  self._exit)
-                self.loop.on_key('C-L',  self._select)
-                self.loop.on_key('Up',   self._move_cursor, -1)
-                self.loop.on_key('C-K',  self._move_cursor, -1)
-                self.loop.on_key('C-P',  self._move_cursor, -1)
-                self.loop.on_key('Down', self._move_cursor, 1)
-                self.loop.on_key('C-J',  self._move_cursor, 1)
-                self.loop.on_key('C-N',  self._move_cursor, 1)
-                self.loop.on_key('BS',   self._prompt_changed, None)
-                self.loop.on_printable(self._prompt_changed)
-
-                vim.command('setlocal buftype=nofile noswapfile nonumber colorcolumn=')
-                vim.command('setlocal stl={}'.format(self.title))
-                vim.command('noremap <buffer> <silent> <Plug>l :python vial.loop.pop()<CR>')
-
-            self.buf = vim.current.buffer
-            self.win = vim.current.window
-
-        vim.command('setlocal nobuflisted')
+        make_scratch(self.name, self.init, self.title, force=not self.loop)
         self.list_view.attach(self.buf, self.win)
 
         if prompt is not None:
@@ -200,3 +187,25 @@ class SearchDialog(object):
     def on_select(self, item, cursor): pass
     def on_prompt_changed(self, prompt): pass
 
+
+def make_scratch(name, init, title=None, force=False, placement=None):
+    win, ebuf = get_winbuf(name)
+    if not win:
+        placement = placement or 'botright'
+        if ebuf:
+            vim.command('silent keepalt {} sbuffer {}'.format(placement, ebuf.number))
+        else:
+            vim.command('silent keepalt {} split {}'.format(placement, name))
+            vim.command('setlocal buftype=nofile noswapfile nonumber colorcolumn=')
+            if title:
+                vim.command('setlocal stl={}'.format(title))
+
+        win = vim.current.window
+
+    buf = vim.current.buffer
+
+    if not ebuf or force:
+        init(win, buf)
+
+    vim.command('setlocal nobuflisted')
+    return win, buf

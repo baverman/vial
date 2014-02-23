@@ -185,4 +185,3 @@ def get_ws(line):
 
 def get_ws_len(line):
     return len(line) - len(line.lstrip())
-
