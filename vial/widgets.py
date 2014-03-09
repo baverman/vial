@@ -106,7 +106,6 @@ class SearchDialog(object):
         self.loop = None
 
     def init(self, win, buf):
-        self.win, self.buf = win, buf
         self.loop = loop.Loop(get_key_code('Plug') + 'l')
         self.loop.on_key('CR',   self._exit, True)
         self.loop.on_key('Esc',  self._exit)
@@ -122,7 +121,8 @@ class SearchDialog(object):
         vim.command('noremap <buffer> <silent> <Plug>l :python vial.loop.pop()<CR>')
 
     def show(self, prompt=None):
-        make_scratch(self.name, self.init, self.title, force=not self.loop)
+        self.win, self.buf = make_scratch(self.name, self.init,
+            self.title, force=not self.loop)
         self.list_view.attach(self.buf, self.win)
 
         if prompt is not None:

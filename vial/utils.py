@@ -90,7 +90,7 @@ def get_winbuf(name):
     buf = get_buf_by_name(name)
     if buf:
         for w in vim.windows:
-            if w.buffer == buf:
+            if w.valid and w.buffer == buf:
                 win = w
                 break
 
