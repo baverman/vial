@@ -136,3 +136,11 @@ def changed_projects():
         print ', '.join(os.path.basename(r) for r in changed)
     else:
         echo('There are no any changes')
+
+
+def new(fname):
+    dname = os.path.dirname(fname)
+    if not os.path.exists(dname):
+        os.makedirs(dname)
+
+    vim.command('e {}'.format(fname))

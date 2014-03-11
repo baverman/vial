@@ -7,3 +7,5 @@ def init():
     vial.register_function('VialIndent()', '.plugin.indent')
 
     vial.register_command('VialChangedProjects', '.plugin.changed_projects')
+
+    vial.register_command('VialNew', '.plugin.new', complete='file', nargs=1)
