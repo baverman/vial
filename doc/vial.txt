@@ -1,0 +1,38 @@
+*vial.txt* a framework to develop VIM plugins in python
+
+CONTENTS                                                 *vial-contents*
+
+Plugin structure                  |vial-plugin-structure|
+Tutorial                          |vial-tutorial|
+Plugin API                        |vial-plugin-api.txt|
+Examples                          |vial-examples|
+
+
+PLUGIN STRUCTURE                                 *vial-plugin-structure*
+
+The basic structure repeats an ordinary VIM plugin. You can use the same
+directories (syntax, color, ftdetect, doc, ftplugin and so on). The only
+difference is a "vial-plugin" dir. You should put your python code
+there.
+>
+    hello-world/
+        README.md
+        LICENSE
+        doc/
+            hello-world.txt
+        vial-plugin/
+            hello_world/
+                __init__.py
+<
+Note: "vial-plugin" contains a top-level package "hello_world".
+
+Vial scans 'rtp' for "vial-plugin" directories and tries to load top
+level packages as plugins. So, vial plugins are pathogen (and other PM)
+friendly and you can manage plugins (enable/disable) with your favorite
+tools.
+
+TUTORIAL                                                 *vial-tutorial*
+
+EXAMPLES                                                 *vial-examples*
+
+
