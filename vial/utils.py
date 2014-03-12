@@ -1,6 +1,8 @@
 import os
 import re
 import sys
+import logging
+import traceback
 
 from vial import vim, vfunc
 
@@ -54,18 +56,17 @@ def bytestr(string):
     return string
 
 
-def echo(message=None):
+def _echo(cmd, message):
     if message:
-        message = bytestr(message).replace("'", "''")
-        vim.command("echo '{}'".format(message))
-    else:
-        vim.command('echo')
+        message = vfunc.escape(bytestr(message), r'\"')
+        vim.command('{} "{}"'.format(cmd, message))
+        vim.command(cmd)
 
 
-def echon(message=None):
-    if message:
-        message = bytestr(message).replace("'", "''")
-        vim.command("echon '{}'".format(message))
+def echo(message=None): _echo('echo', message)
+def echon(message=None): _echo('echon', message)
+def echom(message=None): _echo('echom', message)
+def echoerr(message=None): _echo('echoerr', message)
 
 
 def get_buf(bufnr):
@@ -185,3 +186,24 @@ def get_ws(line):
 
 def get_ws_len(line):
     return len(line) - len(line.lstrip())
+
+
+class VimLoggingHandler(logging.Handler):
+    def emit(self, record):
+        msg = record.getMessage()
+
+        if record.exc_info:
+            for line in traceback.format_exception(*record.exc_info):
+                for l in line.rstrip().splitlines():
+                    echom(l)
+
+            msg = msg + ' ^^^'
+
+        if record.levelno >= logging.ERROR:
+            vim.command('echohl ErrorMsg')
+            echom(msg)
+            vim.command('echohl None')
+        elif record.levelno >= logging.DEBUG:
+            echom(msg)
+        else:
+            echo(msg)

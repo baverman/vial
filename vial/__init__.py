@@ -36,15 +36,16 @@ refs = {}
 
 def init():
     import logging
-    logging.basicConfig(format='%(message)s', level=logging.DEBUG)
+    import vial.utils
+    root_logger = logging.getLogger()
+    root_logger.handlers[:] = []
+    root_logger.addHandler(utils.VimLoggingHandler())
 
     global event, plugin_manager
 
     event = EventManager()
 
-    import vial.utils
     import vial.plugins
-
     plugin_manager = vial.plugins.Manager()
     plugin_manager.add_from(vim.eval('&runtimepath').split(','))
     plugin_manager.add('vial.plugins.grep')
