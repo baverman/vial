@@ -61,7 +61,7 @@ def init_session():
         vial_session_fname = vial_session_fname[:-4]
 
     vial_session_fname += 'v.vim'
-    vim.command('silent! source {}'.format(vial_session_fname)) # TODO: escape
+    vim.command('silent! source {}'.format(vfunc.fnameescape(vial_session_fname)))
 
 
 def register_command(name, callback, **opts):
