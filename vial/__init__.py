@@ -29,7 +29,6 @@ class VimFuncs(object):
 
 
 vfunc = VimFuncs()
-event = None
 plugin_manager = None
 refs = {}
 
@@ -41,11 +40,8 @@ def init():
     root_logger.handlers[:] = []
     root_logger.addHandler(utils.VimLoggingHandler())
 
-    global event, plugin_manager
-
-    event = EventManager()
-
     import vial.plugins
+    global plugin_manager
     plugin_manager = vial.plugins.Manager()
     plugin_manager.add_from(vim.eval('&runtimepath').split(','))
     plugin_manager.add('vial.plugins.grep')
@@ -54,14 +50,6 @@ def init():
     plugin_manager.init()
 
     init_session()
-
-    vim.command('augroup VialFileType')
-    vim.command('autocmd!')
-    vim.command('autocmd FileType * python vial.filetype_changed()')
-    vim.command('augroup END')
-
-    for b in vim.buffers:
-        _emit_ft(b, vfunc.getbufvar(b.number, '&filetype'))
 
 
 def init_session():
@@ -76,11 +64,6 @@ def init_session():
     vim.command('silent! source {}'.format(vial_session_fname)) # TODO: escape
 
 
-def event_received():
-    event = vim.eval("a:event")
-    # print(event)
-
-
 def register_command(name, callback, **opts):
     fargs = '' if opts.get('nargs', 0) < 1 else '<f-args>'
     opts = ' '.join('-{}={}'.format(*r) for r in opts.iteritems())
@@ -93,32 +76,6 @@ def register_function(signature, callback):
       python {1}()
       return a:result
     endfunction'''.format(signature, ref(callback, 1)))
-
-
-def filetype_changed():
-    ft = vfunc.expand('<amatch>')
-    bufnr = int(vfunc.expand('<abuf>'))
-    buf = utils.get_buf(bufnr)
-    _emit_ft(buf, ft)
-
-
-def _emit_ft(buf, ft):
-    event.emit('filetype', buf, ft)
-    for r in ft.split('.'):
-        event.emit('filetype:{}'.format(r), buf)
-
-
-class EventManager(object):
-    def __init__(self):
-        self.callbacks = {}
-
-    def emit(self, name, *args):
-        if name in self.callbacks:
-            for c in self.callbacks[name]:
-                c(*args)
-
-    def on(self, name, callback):
-        self.callbacks.setdefault(name, []).append(callback)
 
 
 class ref(object):

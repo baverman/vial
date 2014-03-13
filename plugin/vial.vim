@@ -11,12 +11,8 @@ endif
 let g:loaded_vial = "true"
 
 augroup autovial
-    autocmd VimEnter * :python vial.init()
+    autocmd VimEnter * python vial.init()
 augroup END
-
-function! VialEmit(event)
-    python vial.event_received()
-endfunction
 
 function! VialGetKey()
     try
