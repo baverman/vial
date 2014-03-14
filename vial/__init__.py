@@ -14,7 +14,7 @@ if not hasattr(vim, 'vvars'):
     vim.vvars = vim.bindeval('v:')
 
 from .helpers import register_command, register_function, VimLoggingHandler, \
-    vfunc, ref, dref, refs, lfunc
+    vfunc, ref, dref, refs, lfunc, PluginManager
 
 plugin_manager = None
 
@@ -25,11 +25,14 @@ def init():
     root_logger.handlers[:] = []
     root_logger.addHandler(VimLoggingHandler())
 
-    import vial.plugins
     global plugin_manager
-    plugin_manager = vial.plugins.Manager()
-    plugin_manager.add_from(vim.eval('&runtimepath').split(','))
-    plugin_manager.init()
+    plugin_manager = PluginManager()
+
+    for plugin in vim.vars.get('vial_plugins', []):
+        plugin_manager.add(plugin)
+
+    if not vim.vars.get('vial_disable_auto_discovery'):
+        plugin_manager.add_from(vim.eval('&runtimepath').split(','))
 
     init_session()
 

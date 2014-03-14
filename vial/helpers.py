@@ -1,9 +1,11 @@
 import sys
+import os.path
 import logging
 import traceback
 
 from . import vim
 
+log = logging.getLogger(__name__)
 refs = {}
 
 
@@ -132,3 +134,74 @@ def lfunc(name, depth=0):
     inner.__module__ = module_name
     inner.is_lazy = True
     return inner
+
+
+def get_package(name):
+    try:
+        return sys.modules[name]
+    except KeyError:
+        __import__(name)
+        return sys.modules[name]
+
+
+def find_plugins(path):
+    plugins = []
+    pypath = []
+    for p in path:
+        vp = os.path.join(p, 'vial-plugin')
+        if os.path.exists(vp):
+            pypath.append(vp)
+            for name in os.listdir(vp):
+                if name.endswith('.py'):
+                    plugins.append(name[:-3])
+                elif os.path.exists(os.path.join(vp, name, '__init__.py')):
+                    plugins.append(name)
+
+    return plugins, pypath
+
+
+class PluginManager(object):
+    def __init__(self):
+        self.plugins = {}
+
+    def add_from(self, path):
+        plugins, pypath = find_plugins(path)
+        sys.path.extend(pypath)
+        for name in plugins:
+            self.add(name)
+
+    def add(self, name):
+        try:
+            module = get_package(name)
+        except:
+            log.exception('Plugin import failed: %s', name)
+            return False
+
+        if not hasattr(module, 'init'):
+            return False
+
+        try:
+            module.init()
+        except:
+            log.exception('Plugin init failed: %s', name)
+            return False
+
+        self.plugins[name] = module
+        return True
+
+    def addlocal(self, name):
+        cwd = os.getcwd()
+        if cwd not in sys.path:
+            sys.path.append(cwd)
+
+        return self.add(name)
+
+    def remove(self, name):
+        dotname = name + '.'
+        for k in refs.keys():
+            if k.startswith(dotname):
+                del refs[k]
+
+        for k in sys.modules.keys():
+            if k == name or k.startswith(dotname):
+                del sys.modules[k]
