@@ -2,11 +2,47 @@
 
 CONTENTS                                                 *vial-contents*
 
-Plugin structure                  |vial-plugin-structure|
-Tutorial                          |vial-tutorial|
+About                             |vial-about|
+Tutorial                          |vial-tutor|
+    Init function                 |vial-tutor-init|
+    Load/reload plugin            |vial-tutor-load-reload|
+    Calling python functions      |vial-tutor-call-python|
+    Lazy functions                |vial-tutor-lazy-functions|
+    register_function             |vial-tutor-register-function|
+    @vimfunction decorator        |vial-tutor-vimfunction|
+    register_command              |vial-tutor-create-command|
+    Calling vim functions         |vial-tutor-call-vim|
+    Plugin autodiscovery          |vial-tutor-plugin-autodiscovery|
 Plugin API                        |vial-plugin-api.txt|
 Examples                          |vial-examples|
 
+
+ABOUT                                                       *vial-about*
+
+Vial does not try to hide a VimL behind the scenes. It's a thin
+wrapper for common tasks such as:
+
+    * Calling python functions from VimL
+    * Pass command and func args to python functions
+    * Lazy loading of python plugins
+    * Simple widgest
+    * Window and buffer management
+
+In simple cases you can write plugins without any VimL at all. But in
+practice you should know about events, autocommands, buf/win options and
+so on. Remember, vial's goal is not to hide VimL but to make writing
+python plugins easy.
+
+
+TUTORIAL                                                 *vial-tutorial*
+
+Here I'll explain how to write a simple vial plugin. It will insert
+'Hello world' string at cursor position.
+
+Init function~
+                                                       *vial-tutor-init*
+Vial plugin is an ordinary python module. It must contain "init"
+function which takes zero arguments.
 
 PLUGIN STRUCTURE                                 *vial-plugin-structure*
 
@@ -31,7 +67,6 @@ level packages as plugins. So, vial plugins are pathogen (and other PM)
 friendly and you can manage plugins (enable/disable) with your favorite
 tools.
 
-TUTORIAL                                                 *vial-tutorial*
 
 EXAMPLES                                                 *vial-examples*
 
