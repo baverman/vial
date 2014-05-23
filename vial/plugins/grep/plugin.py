@@ -9,6 +9,7 @@ from vial.utils import get_projects, redraw, vimfunction
 
 MAX_FILESIZE = 10 * 1024 * 1024
 
+
 def grep(query):
     matcher = re.compile(re.escape(query))
 
@@ -38,6 +39,12 @@ def grep(query):
                 offset = start - source.rfind('\n', 0, start)
                 text = lines[line - 1]
 
+                if len(text) > 100:
+                    offstart = max(0, offset - 30)
+                    text = text[offstart:offstart+60] + '...'
+                    if offstart:
+                        text = '...' + text
+
                 result.append({
                     'bufnr': '',
                     'filename': fullpath,
@@ -50,7 +57,7 @@ def grep(query):
                     'text': text.replace('\x00', ' '),
                     'type': ''
                 })
-                
+
     vfunc.setqflist(result)
 
     if result:
@@ -58,6 +65,7 @@ def grep(query):
 
     redraw()
     print '{} matches found'.format(len(result))
+
 
 @vimfunction
 def grepop(type):
