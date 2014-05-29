@@ -1,4 +1,6 @@
+import re
 import os.path
+import fnmatch
 
 from subprocess import Popen, PIPE
 
@@ -144,3 +146,21 @@ def new(fname):
         os.makedirs(dname)
 
     vim.command('e {}'.format(fname))
+
+
+def filter_qf(pattern):
+    qf = vfunc.getqflist()
+    if not qf:
+        return
+
+    regex = re.compile(fnmatch.translate(pattern))
+
+    result = []
+    for r in qf:
+       fname = vfunc.bufname(r['bufnr'])
+       if regex.match(fname):
+           nr = dict(r)
+           nr['filename'] = fname
+           result.append(nr)
+
+    vfunc.setqflist(result)
