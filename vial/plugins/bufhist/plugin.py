@@ -66,7 +66,7 @@ def jump(dir):
     if not bufnr in history:
         history = add_to_history(w, bufnr)
 
-    names = {r.number: split(r.name)
+    names = {r.number: split(r.name) if r.name else ['', '[buf-{}]'.format(r.number)]
         for r in vim.buffers if vfunc.buflisted(r.number)}
     history[:] = filter(lambda r: r in names, history)
 
@@ -85,7 +85,11 @@ def jump(dir):
     if width < 0:
         width += int(vim.eval('&columns')) - 1
 
-    idx = history.index(bufnr)
+    try:
+        idx = history.index(bufnr)
+    except ValueError:
+        return
+
     idx += dir
 
     if idx < 0:
