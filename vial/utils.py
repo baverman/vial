@@ -62,7 +62,7 @@ def get_buf_by_name(name):
 
 
 def get_projects():
-    return get_var('vial_projects', [os.getcwd()])
+    return get_var('vial_projects') or [os.getcwd()]
 
 
 def get_winbuf(name):

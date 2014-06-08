@@ -164,3 +164,13 @@ def filter_qf(pattern):
            result.append(nr)
 
     vfunc.setqflist(result)
+
+
+def add_project(project):
+    projects = list(vim.vars.get('vial_projects', []))
+    projects.append(project)
+    vim.vars['vial_projects'] = projects
+
+
+def clear_projects():
+    vim.vars['vial_projects'] = []
