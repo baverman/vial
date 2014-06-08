@@ -202,7 +202,10 @@ def make_scratch(name, init, title=None, force=False, placement=None):
 
         win = vim.current.window
 
-    buf = vim.current.buffer
+        buf = vim.current.buffer
+    else:
+        buf = ebuf
+        focus_window(win)
 
     if not ebuf or force:
         init(win, buf)
