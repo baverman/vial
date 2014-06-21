@@ -188,7 +188,8 @@ class SearchDialog(object):
     def on_prompt_changed(self, prompt): pass
 
 
-def make_scratch(name, init, title=None, force=False, placement=None):
+def make_scratch(name, init, title=None, force=False, placement=None, focus=True):
+    cwin = vim.current.window
     win, ebuf = get_winbuf(name)
     if not win:
         placement = placement or 'botright'
@@ -211,4 +212,8 @@ def make_scratch(name, init, title=None, force=False, placement=None):
         init(win, buf)
 
     vim.command('setlocal nobuflisted')
+
+    if not focus:
+        focus_window(cwin)
+
     return win, buf
