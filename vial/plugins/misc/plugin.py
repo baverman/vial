@@ -49,9 +49,9 @@ def indent():
         while True:
             start = pline.find('(', start + 1)
             if start < 0: break
-            vfunc.cursor(line, start + 1)
+            vfunc.cursor(line - 1, start + 1)
             l, p = vfunc.searchpairpos('(', '', ')', 'nW', '', line)
-            if not l:
+            if not l or l != line - 1:
                 return start + 1
 
     w = vfunc.indent(line-1)
