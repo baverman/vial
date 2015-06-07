@@ -45,6 +45,16 @@ def indent():
     if pline and pline[-1] in ('(', '[', '{'):
         return shift_indent(line)
 
+    if pline:
+        start = -1
+        while True:
+            start = pline.find('(', start + 1)
+            if start < 0: break
+            vfunc.cursor(line, start + 1)
+            l, p = vfunc.searchpairpos('(', '', ')', 'nW', '', line)
+            if not l:
+                return start + 1
+
     w = vfunc.indent(line-1)
     if not buf[line-1].strip() and w != pos:
         return -1
