@@ -1,4 +1,5 @@
 import sys
+import re
 import os.path
 import logging
 import traceback
@@ -50,11 +51,27 @@ def register_command(name, callback, **opts):
         name, opts, ref(callback, 1), fargs))
 
 
+args_regex = re.compile(r'(?:\(|,)\s*(\w+)')
+
+
 def register_function(signature, callback):
+    args = args_regex.findall(signature)
+    if args:
+        args = ', ' + ', '.join("'{}'".format(r) for r in args)
+    else:
+        args = ''
     vim.command('''function! {0}
-      python {1}()
-      return a:result
-    endfunction'''.format(signature, ref(callback, 1)))
+      return pyeval("vial.helpers.vimcall({1}{2})")
+    endfunction'''.format(signature, ref(callback, 1), args))
+
+
+def vimcall(func, *args):
+    lvars = vim.bindeval('a:')
+    result = func(*[lvars[r] for r in args])
+    if result is None:
+        result = ''
+
+    return result
 
 
 class ref(object):

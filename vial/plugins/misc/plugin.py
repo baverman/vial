@@ -5,7 +5,7 @@ import fnmatch
 from subprocess import Popen, PIPE
 
 from vial import vfunc, vim
-from vial.utils import buffer_with_file, focus_window, vimfunction, \
+from vial.utils import buffer_with_file, focus_window, \
     get_ws_len, mark, get_key_code, echo, get_projects
 from vial.widgets import SearchDialog, ListFormatter, ListView
 
@@ -34,7 +34,6 @@ def shift_indent(line, shift=1):
     return vfunc.indent(line-1) + shift * vfunc.eval('&sw')
 
 
-@vimfunction
 def indent():
     line, pos = vim.current.window.cursor
     buf = vim.current.buffer

@@ -9,7 +9,6 @@ Tutorial                          |vial-tutor|
     Calling python functions      |vial-tutor-call-python|
     Lazy functions                |vial-tutor-lazy-functions|
     register_function             |vial-tutor-register-function|
-    @vimfunction decorator        |vial-tutor-vimfunction|
     register_command              |vial-tutor-create-command|
     Calling vim functions         |vial-tutor-call-vim|
     Plugin autodiscovery          |vial-tutor-plugin-autodiscovery|

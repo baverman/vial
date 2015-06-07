@@ -96,21 +96,6 @@ def focus_window(winnr):
     vim.command('{}wincmd w'.format(winnr))
 
 
-def vimfunction(func):
-    from inspect import getargspec
-    args = getargspec(func)[0]
-    def inner():
-        lvars = vim.bindeval('a:')
-        result = func(*[lvars[r] for r in args])
-        if result is None:
-            result = ''
-
-        lvars['result'] = result
-
-    inner.func = func
-    return inner
-
-
 def get_content(buf=None):
     buf = buf or vim.current.buffer
     return '\n'.join(buf[:])

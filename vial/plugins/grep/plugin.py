@@ -5,7 +5,7 @@ from time import time
 
 from vial import vfunc, vim
 from vial.fsearch import get_files
-from vial.utils import get_projects, redraw, vimfunction
+from vial.utils import get_projects, redraw
 
 MAX_FILESIZE = 10 * 1024 * 1024
 
@@ -67,7 +67,6 @@ def grep(query):
     print '{} matches found'.format(len(result))
 
 
-@vimfunction
 def grepop(type):
     old = vfunc.getreg('"')
 
