@@ -56,16 +56,12 @@ args_regex = re.compile(r'(?:\(|,)\s*(\w+)')
 
 def register_function(signature, callback):
     args = args_regex.findall(signature)
-    if args:
-        args = ', ' + ', '.join("'{}'".format(r) for r in args)
-    else:
-        args = ''
     vim.command('''function! {0}
-      return pyeval("vial.helpers.vimcall({1}{2})")
+      return pyeval("vial.helpers.vimcall({1}, {2})")
     endfunction'''.format(signature, ref(callback, 1), args))
 
 
-def vimcall(func, *args):
+def vimcall(func, args):
     lvars = vim.bindeval('a:')
     result = func(*[lvars[r] for r in args])
     if result is None:
