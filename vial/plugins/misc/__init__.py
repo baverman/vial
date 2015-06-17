@@ -1,5 +1,6 @@
 import vial
 
+
 def init():
     vial.register_command('VialEscape', '.plugin.escape')
     vial.register_command('VialSearchOutline', '.plugin.search_outline')

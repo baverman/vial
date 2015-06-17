@@ -1,5 +1,6 @@
 import vial
 
+
 def init():
     vial.register_command('VialGrep', '.plugin.grep', nargs=1)
 

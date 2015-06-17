@@ -6,6 +6,8 @@ from .helpers import echo, echon, echom, echoerr
 
 
 KEY_CACHE = {}
+
+
 def get_key_code(key):
     try:
         return KEY_CACHE[key]
@@ -17,6 +19,8 @@ def get_key_code(key):
 
 
 keys_re = re.compile(r'<(.+?)>')
+
+
 def replace_key_match(match):
     return get_key_code(match.group(1))
 
@@ -108,6 +112,8 @@ def get_content_and_offset():
 
 
 NOT_FILE_BUFFER_TYPES = set(('nofile', 'help'))
+
+
 def buffer_with_file(buf):
     return buf.name and vfunc.buflisted(buf.number) and \
         vfunc.getbufvar(buf.number, '&buftype') not in NOT_FILE_BUFFER_TYPES

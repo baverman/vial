@@ -34,7 +34,7 @@ def shift_indent(line, shift=1):
     return vfunc.indent(line-1) + shift * vfunc.eval('&sw')
 
 
-parens = {'(': ')', '{': '}', '[': ']',}
+parens = {'(': ')', '{': '}', '[': ']'}
 rparens = {v: k for k, v in parens.iteritems()}
 
 
@@ -61,7 +61,7 @@ def indent():
         start = -1
         while True:
             start, openb = max((pline.rfind(b, 0, start), b)
-                                for b in parens.keys())
+                               for b in parens.keys())
             if start < 0: break
             vfunc.cursor(line - 1, start + 1)
             l, _ = vfunc.searchpairpos(openb, '', parens[openb], 'nW', '', line)
@@ -76,6 +76,8 @@ def indent():
 
 
 search_outline_dialog = None
+
+
 def search_outline():
     global search_outline_dialog
     if not search_outline_dialog:
@@ -88,7 +90,7 @@ class SearchOutlineDialog(SearchDialog):
     def __init__(self):
         self.lines = []
         SearchDialog.__init__(self, '__vial_search_outline__',
-            ListView(self.lines, ListFormatter(2,0, 3,1)))
+                              ListView(self.lines, ListFormatter(2, 0, 3, 1)))
 
     def open(self):
         self.last_window = vfunc.winnr()
@@ -143,7 +145,8 @@ def changed_projects():
         if not os.path.exists(os.path.join(p, '.git')):
             continue
 
-        proc = Popen(['git', 'status', '-b', '--porcelain'], cwd=p, stdout=PIPE, stderr=PIPE)
+        proc = Popen(['git', 'status', '-b', '--porcelain'],
+                     cwd=p, stdout=PIPE, stderr=PIPE)
         out, err = proc.communicate()
 
         if proc.returncode != 0:
@@ -180,11 +183,11 @@ def filter_qf(pattern):
 
     result = []
     for r in qf:
-       fname = vfunc.bufname(r['bufnr'])
-       if regex.match(fname):
-           nr = dict(r)
-           nr['filename'] = fname
-           result.append(nr)
+        fname = vfunc.bufname(r['bufnr'])
+        if regex.match(fname):
+            nr = dict(r)
+            nr['filename'] = fname
+            result.append(nr)
 
     vfunc.setqflist(result)
 

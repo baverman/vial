@@ -3,12 +3,15 @@ from vial.widgets import SearchDialog, ListFormatter, ListView
 from vial.utils import focus_window, mark
 
 dialog = None
+
+
 def show(items):
     global dialog
     if not dialog:
         dialog = Outline()
 
     dialog.open(items)
+
 
 def get_outline(items):
     result = []
@@ -20,7 +23,7 @@ def get_outline(items):
                 if 'dead' in item:
                     return push_childs(inner, plevel+1, parent, la + 1)
 
-                item['parent'] = parent 
+                item['parent'] = parent
                 item['path'] = parent + (item['name'],)
                 item['level'] -= la
                 result.append(item)
@@ -41,10 +44,11 @@ def get_outline(items):
 
     return result
 
+
 class Outline(SearchDialog):
     def __init__(self):
         self.items = []
-        view = ListView(self.items, ListFormatter(1,0, 2,1))
+        view = ListView(self.items, ListFormatter(1, 0, 2, 1))
         SearchDialog.__init__(self, '__outline__', view)
 
     def fill(self):
@@ -79,7 +83,7 @@ class Outline(SearchDialog):
 
     def search(self, prompt):
         self.list_view.clear()
-        matchers =[
+        matchers = [
             lambda r: r.startswith(prompt),
             lambda r: prompt in r,
             lambda r: r.lower().startswith(prompt),

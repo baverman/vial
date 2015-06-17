@@ -6,8 +6,11 @@ from .utils import get_key_code, get_key, redraw
 TIME_SLICE = 0.02
 
 waiting_loops = []
+
+
 def pop():
     waiting_loops.pop().enter()
+
 
 class Loop(object):
     def __init__(self, feedkeys):

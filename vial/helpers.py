@@ -38,6 +38,7 @@ def _echo(cmd, message):
         vim.command('{} "{}"'.format(cmd, message))
         vim.command(cmd)
 
+
 def echo(message=None): _echo('echo', message)
 def echon(message=None): _echo('echon', message)
 def echom(message=None): _echo('echom', message)
@@ -142,8 +143,9 @@ def lfunc(name, depth=0):
             try:
                 func = inner.func = getattr(module, func_name)
             except AttributeError:
-                raise AttributeError("module '{}' has no attribute '{}'".format(
-                    module.__name__, func_name))
+                raise AttributeError(
+                    "module '{}' has no attribute '{}'".format(module.__name__,
+                                                               func_name))
 
         return func(*args, **kwargs)
 

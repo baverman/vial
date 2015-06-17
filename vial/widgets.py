@@ -39,7 +39,8 @@ class ListFormatter(object):
         self.widths = [0] * len(self.columns)
 
     def render(self, items):
-        fmt = self.spacing.join('{{{}:<{}}}'.format(f[0], w) for f, w in zip(self.columns, self.widths))
+        fmt = self.spacing.join('{{{}:<{}}}'.format(f[0], w)
+                                for f, w in zip(self.columns, self.widths))
 
         for r in items:
             yield fmt.format(*r)
@@ -122,7 +123,7 @@ class SearchDialog(object):
 
     def show(self, prompt=None):
         self.win, self.buf = make_scratch(self.name, self.init,
-            self.title, force=not self.loop)
+                                          self.title, force=not self.loop)
         self.list_view.attach(self.buf, self.win)
 
         if prompt is not None:
@@ -194,7 +195,8 @@ def make_scratch(name, init, title=None, force=False, placement=None, focus=True
     if not win:
         placement = placement or 'botright'
         if ebuf:
-            vim.command('silent keepalt {} sbuffer {}'.format(placement, ebuf.number))
+            vim.command('silent keepalt {} sbuffer {}'.format(placement,
+                                                              ebuf.number))
         else:
             vim.command('silent keepalt {} split {}'.format(placement, name))
             vim.command('setlocal buftype=nofile noswapfile nonumber colorcolumn=')

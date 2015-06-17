@@ -1,6 +1,5 @@
 from functools import wraps
 
-import vial.utils
 from vial import ref, refs
 
 

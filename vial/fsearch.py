@@ -40,6 +40,7 @@ def path_items_startswith(pattern, skip):
     namep = itemsp[-1]
     itemsp = itemsp[:-1]
     count = len(itemsp)
+
     def inner(name, path):
         if namep and not name.startswith(namep):
             return False
@@ -59,6 +60,7 @@ def path_items_match(pattern):
     namep = itemsp[-1]
     itemsp = itemsp[:-1]
     count = len(itemsp)
+
     def inner(name, path):
         if namep and not name.startswith(namep):
             return False
@@ -74,11 +76,15 @@ def path_items_match(pattern):
 
 def get_matchers(pattern):
     if pattern.startswith('.'):
-        return name_endswith(pattern), name_startswith(pattern),\
-            name_match(pattern), path_match(pattern)
+        return (name_endswith(pattern),
+                name_startswith(pattern),
+                name_match(pattern),
+                path_match(pattern))
     elif os.sep in pattern:
-        return path_items_startswith(pattern, 0), path_items_startswith(pattern, 1),\
-            path_items_match(pattern), path_match(pattern) 
+        return (path_items_startswith(pattern, 0),
+                path_items_startswith(pattern, 1),
+                path_items_match(pattern),
+                path_match(pattern))
 
     return name_startswith(pattern), name_match(pattern), path_match(pattern)
 
@@ -113,13 +119,15 @@ def get_files(root, cache=None):
         except KeyError:
             pass
 
-    ignore_files = re.compile('.*({})$'.format('|'.join(r'\.{}'.format(r)
-        for r in get_dvar('vial_ignore_extensions'))))
+    ignore_files = re.compile('.*({})$'.format(
+        '|'.join(r'\.{}'.format(r)
+                 for r in get_dvar('vial_ignore_extensions'))))
 
     ignore_dirs = re.compile('({})'.format('|'.join(
         get_dvar('vial_ignore_dirs'))))
 
     fcache = []
+
     def filler():
         for r in _walk(root, '', ignore_files, ignore_dirs):
             fcache.append(r)
@@ -129,4 +137,3 @@ def get_files(root, cache=None):
             cache[root] = fcache
 
     return filler()
-

@@ -19,7 +19,7 @@ def add_to_history(w, bufnr):
 
 
 def check_history(window):
-    if not VHIST in window.vars:
+    if VHIST not in window.vars:
         bufnr = vim.current.buffer.number
         history = [r.number for r in vim.buffers if r.number != bufnr]
         history.reverse()
@@ -50,6 +50,8 @@ def moved():
 
 
 skey = lambda r: r[1][1]
+
+
 def jump(dir):
     w = vim.current.window
     check_history(w)
@@ -60,14 +62,16 @@ def jump(dir):
     now = time()
     lastbuf = w.vars.get(VLAST, None)
     if not lastbuf or (bufnr == lastbuf[0] and
-            now - lastbuf[1] > vim.vars['vial_bufhist_timeout']):
+                       now - lastbuf[1] > vim.vars['vial_bufhist_timeout']):
         history = add_to_history(w, bufnr)
 
-    if not bufnr in history:
+    if bufnr not in history:
         history = add_to_history(w, bufnr)
 
-    names = {r.number: split(r.name) if r.name else ['', '[buf-{}]'.format(r.number)]
-        for r in vim.buffers if vfunc.buflisted(r.number)}
+    names = {r.number: (split(r.name)
+                        if r.name
+                        else ['', '[buf-{}]'.format(r.number)])
+             for r in vim.buffers if vfunc.buflisted(r.number)}
     history[:] = filter(lambda r: r in names, history)
 
     dups = True
