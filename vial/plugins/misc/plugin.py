@@ -5,8 +5,8 @@ import fnmatch
 from subprocess import Popen, PIPE
 
 from vial import vfunc, vim
-from vial.utils import buffer_with_file, focus_window, \
-    get_ws_len, mark, get_key_code, echo, get_projects
+from vial.utils import (buffer_with_file, focus_window, get_ws_len, mark,
+                        echo, get_projects, get_dvar)
 from vial.widgets import SearchDialog, ListFormatter, ListView
 
 
@@ -48,7 +48,7 @@ def indent():
         start = pline.rfind(')')
         if start >= 0:
             vfunc.cursor(line - 1, start + 1)
-            l, p = vfunc.searchpairpos('(', '', ')', 'nWb', '', max(0, line - 30))
+            l, _ = vfunc.searchpairpos('(', '', ')', 'nWb', '', max(0, line - 30))
             if l and l != line - 1:
                 return vfunc.indent(l)
 
@@ -57,7 +57,7 @@ def indent():
             start = pline.find('(', start + 1)
             if start < 0: break
             vfunc.cursor(line - 1, start + 1)
-            l, p = vfunc.searchpairpos('(', '', ')', 'nW', '', line)
+            l, _ = vfunc.searchpairpos('(', '', ')', 'nW', '', line)
             if not l or l != line - 1:
                 return start + 1
 
@@ -182,11 +182,28 @@ def filter_qf(pattern):
     vfunc.setqflist(result)
 
 
-def add_project(project):
-    projects = list(vim.vars.get('vial_projects', []))
-    projects.append(project)
-    vim.vars['vial_projects'] = projects
+def add_projects(bang, *dirs):
+    if bang:
+        result = []
+    else:
+        result = list(vim.vars.get('vial_projects', []))
+    result.extend(dirs)
+    vim.vars['vial_projects'] = result
 
 
-def clear_projects():
-    vim.vars['vial_projects'] = []
+def add_ignore_extensions(bang, *exts):
+    if bang:
+        result = []
+    else:
+        result = list(get_dvar('vial_ignore_extensions'))
+    result.extend(exts)
+    vim.vars['vial_ignore_extensions'] = list(set(result))
+
+
+def add_ignore_dirs(bang, *dirs):
+    if bang:
+        result = []
+    else:
+        result = list(get_dvar('vial_ignore_dirs'))
+    result.extend(dirs)
+    vim.vars['vial_ignore_dirs'] = list(set(result))

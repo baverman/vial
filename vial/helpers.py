@@ -44,11 +44,15 @@ def echom(message=None): _echo('echom', message)
 def echoerr(message=None): _echo('echoerr', message)
 
 
-def register_command(name, callback, **opts):
-    fargs = '' if opts.get('nargs', 0) < 1 else '<f-args>'
-    opts = ' '.join('-{}={}'.format(*r) for r in opts.iteritems())
-    vim.command('''command! {1} {0} python {2}({3})'''.format(
-        name, opts, ref(callback, 1), fargs))
+def register_command(name, callback, bang=False, **opts):
+    fargs = '' if opts.get('nargs', 0) == 0 else '<f-args>'
+    opts = ['-{}={}'.format(*r) for r in opts.iteritems()]
+    add = ''
+    if bang:
+        opts.append('-bang')
+        add = '"<bang>", '
+    vim.command('''command! {1} {0} python {2}({3}{4})'''.format(
+        name, ' '.join(opts), ref(callback, 1), add, fargs))
 
 
 args_regex = re.compile(r'(?:\(|,)\s*(\w+)')
