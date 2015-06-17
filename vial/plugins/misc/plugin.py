@@ -36,6 +36,7 @@ def shift_indent(line, shift=1):
 
 parens = {'(': ')', '{': '}', '[': ']'}
 rparens = {v: k for k, v in parens.iteritems()}
+pescape = {'(': '(', ')': ')', '[': '\[', ']': '\]', '{': '{', '}': '}'}
 
 
 def indent():
@@ -53,7 +54,7 @@ def indent():
         if start >= 0:
             openb = rparens[closeb]
             vfunc.cursor(line - 1, start + 1)
-            l, _ = vfunc.searchpairpos(openb, '', closeb,
+            l, _ = vfunc.searchpairpos(pescape[openb], '', pescape[closeb],
                                        'nWb', '', max(0, line - 30))
             if l and l != line - 1:
                 return vfunc.indent(l)
@@ -64,7 +65,8 @@ def indent():
                                for b in parens.keys())
             if start < 0: break
             vfunc.cursor(line - 1, start + 1)
-            l, _ = vfunc.searchpairpos(openb, '', parens[openb], 'nW', '', line)
+            l, _ = vfunc.searchpairpos(pescape[openb], '',
+                                       pescape[parens[openb]], 'nW', '', line)
             if not l or l != line - 1:
                 return start + 1
 
