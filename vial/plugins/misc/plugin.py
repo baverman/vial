@@ -34,6 +34,10 @@ def shift_indent(line, shift=1):
     return vfunc.indent(line-1) + shift * vfunc.eval('&sw')
 
 
+parens = {'(': ')', '{': '}', '[': ']',}
+rparens = {v: k for k, v in parens.iteritems()}
+
+
 def indent():
     line, pos = vim.current.window.cursor
     buf = vim.current.buffer
@@ -41,23 +45,26 @@ def indent():
         return shift_indent(line)
 
     pline = buf[line-2].rstrip()
-    if pline and pline[-1] in ('(', '[', '{'):
+    if pline and pline[-1] in parens.keys():
         return shift_indent(line)
 
     if pline:
-        start = pline.rfind(')')
+        start, closeb = max((pline.rfind(b), b) for b in parens.values())
         if start >= 0:
+            openb = rparens[closeb]
             vfunc.cursor(line - 1, start + 1)
-            l, _ = vfunc.searchpairpos('(', '', ')', 'nWb', '', max(0, line - 30))
+            l, _ = vfunc.searchpairpos(openb, '', closeb,
+                                       'nWb', '', max(0, line - 30))
             if l and l != line - 1:
                 return vfunc.indent(l)
 
         start = -1
         while True:
-            start = pline.find('(', start + 1)
+            start, openb = max((pline.rfind(b, 0, start), b)
+                                for b in parens.keys())
             if start < 0: break
             vfunc.cursor(line - 1, start + 1)
-            l, _ = vfunc.searchpairpos('(', '', ')', 'nW', '', line)
+            l, _ = vfunc.searchpairpos(openb, '', parens[openb], 'nW', '', line)
             if not l or l != line - 1:
                 return start + 1
 
