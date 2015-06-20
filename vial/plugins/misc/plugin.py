@@ -199,7 +199,7 @@ def add_projects(bang, *dirs):
         result = []
     else:
         result = list(vim.vars.get('vial_projects', []))
-    result.extend(dirs)
+    result.extend(os.path.abspath(r) for r in dirs)
     vim.vars['vial_projects'] = result
 
 
