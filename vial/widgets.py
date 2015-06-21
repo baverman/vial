@@ -1,5 +1,5 @@
 from . import vim, loop
-from .utils import get_key_code, get_winbuf, echo, redraw, focus_window
+from .utils import get_key_code, echo, redraw, focus_window, get_buf_by_name
 
 
 class ListFormatter(object):
@@ -189,9 +189,16 @@ class SearchDialog(object):
     def on_prompt_changed(self, prompt): pass
 
 
+def find_scratch_window():
+    for w in vim.windows:
+        if w.valid and '_vial_scratch' in w.buffer.vars:
+            return w
+
+
 def make_scratch(name, init=None, title=None, force=False, placement=None, focus=True):
     cwin = vim.current.window
-    win, ebuf = get_winbuf(name)
+    win = find_scratch_window()
+    ebuf = get_buf_by_name(name)
     if not win:
         placement = placement or 'botright'
         if ebuf:
@@ -199,18 +206,23 @@ def make_scratch(name, init=None, title=None, force=False, placement=None, focus
                                                               ebuf.number))
         else:
             vim.command('silent keepalt {} split {}'.format(placement, name))
-            vim.command('setlocal buftype=nofile noswapfile nonumber colorcolumn=')
-            if title:
-                vim.command('setlocal stl={}'.format(title))
 
         win = vim.current.window
-
         buf = vim.current.buffer
     else:
-        buf = ebuf
         focus_window(win)
+        if ebuf:
+            vim.command('silent keepalt buffer {}'.format(name))
+            buf = ebuf
+        else:
+            vim.command('silent keepalt edit {}'.format(name))
+            buf = vim.current.buffer
 
     if not ebuf or force:
+        vim.command('setlocal buftype=nofile noswapfile nonumber colorcolumn=')
+        buf.vars['_vial_scratch'] = 1
+        if title:
+            win.options['statusline'] = title
         init and init(win, buf)
 
     vim.command('setlocal nobuflisted')
