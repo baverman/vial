@@ -129,3 +129,21 @@ def get_ws(line):
 
 def get_ws_len(line):
     return len(line) - len(line.lstrip())
+
+
+def single(init, *args, **kwargs):
+    def getter():
+        try:
+            return getter._object
+        except AttributeError:
+            result = getter._object = init(*args, **kwargs)
+            return result
+
+    def deleter():
+        try:
+            del getter._object
+        except AttributeError:
+            pass
+
+    getter.delete = deleter
+    return getter
