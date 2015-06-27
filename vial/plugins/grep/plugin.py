@@ -25,13 +25,13 @@ def grep(query):
             try:
                 if os.stat(fullpath).st_size > MAX_FILESIZE:
                     continue
+
+                with open(fullpath) as f:
+                    source = f.read()
+                    matches = matcher.finditer(source)
+                    lines = source.splitlines()
             except OSError:
                 continue
-
-            with open(fullpath) as f:
-                source = f.read()
-                matches = matcher.finditer(source)
-                lines = source.splitlines()
 
             for m in matches:
                 start = m.start()
