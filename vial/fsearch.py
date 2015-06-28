@@ -10,7 +10,7 @@ def _walk(root, top, ignore_files=None, ignore_dirs=None):
     dirs_to_visit = []
 
     try:
-        dir_list = listdir(join(root, top))
+        dir_list = sorted(listdir(join(root, top)), key=lambda r: (len(r), r))
     except OSError:
         pass
     else:
