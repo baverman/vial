@@ -1,7 +1,7 @@
 import re
 
 from os import listdir
-from os.path import join, isdir
+from os.path import join, isdir, split
 
 from .utils import get_dvar
 
@@ -29,7 +29,7 @@ def _walk(root, top, ignore_files=None, ignore_dirs=None):
             yield p
 
 
-def get_files(root, cache=None):
+def get_files(root, cache=None, keep_top=False):
     if cache is not None:
         try:
             return cache[root]
@@ -44,9 +44,13 @@ def get_files(root, cache=None):
         get_dvar('vial_ignore_dirs'))))
 
     fcache = []
+    if keep_top:
+        root, top = split(root)
+    else:
+        root, top = root, ''
 
     def filler():
-        for r in _walk(root, '', ignore_files, ignore_dirs):
+        for r in _walk(root, top, ignore_files, ignore_dirs):
             fcache.append(r)
             yield r
 
