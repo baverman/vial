@@ -13,8 +13,8 @@ if not hasattr(vim, 'vars'):
 if not hasattr(vim, 'vvars'):
     vim.vvars = vim.bindeval('v:')
 
-from .helpers import register_command, register_function, VimLoggingHandler, \
-    vfunc, ref, dref, refs, lfunc, PluginManager
+from .helpers import (register_command, register_function, VimLoggingHandler,
+                      vfunc, ref, dref, refs, lfunc, PluginManager, python)
 
 plugin_manager = None
 

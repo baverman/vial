@@ -75,6 +75,11 @@ def vimcall(func, args):
     return result
 
 
+def python(fn, *args):
+    args = ', '.join(repr(r) for r in args)
+    return 'python {}({})'.format(ref(fn, 1), args)
+
+
 class ref(object):
     def __init__(self, fn, depth=0):
         if isinstance(fn, basestring):
