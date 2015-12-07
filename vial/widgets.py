@@ -191,7 +191,7 @@ class SearchDialog(object):
 
 def find_scratch_window():
     for w in vim.windows:
-        if w.valid and '_vial_scratch' in w.buffer.vars:
+        if w.valid and '_vial_scratch' in w.vars:
             return w
 
 
@@ -218,9 +218,9 @@ def make_scratch(name, init=None, title=None, force=False, placement=None, focus
             vim.command('silent keepalt edit {}'.format(name))
             buf = vim.current.buffer
 
+    win.vars['_vial_scratch'] = 1
     if not ebuf or force:
         vim.command('setlocal buftype=nofile noswapfile nonumber colorcolumn=')
-        buf.vars['_vial_scratch'] = 1
         if title:
             win.options['statusline'] = title
         init and init(win, buf)
