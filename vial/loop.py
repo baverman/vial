@@ -57,11 +57,9 @@ class Loop(object):
 
                 if self.reenter:
                     waiting_loops.append(self)
-                    vfunc.feedkeys(self.feedkeys)
+                    vfunc.feedkeys(self.feedkeys, 'i')
 
-                if self.is_lazy:
-                    redraw()
-
+                redraw()
                 return
 
     def refresh(self):
