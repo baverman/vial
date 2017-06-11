@@ -23,6 +23,7 @@ def init():
     import logging
     root_logger = logging.getLogger()
     root_logger.handlers[:] = []
+    root_logger.addHandler(logging.FileHandler('/tmp/vial-error.log'))
     root_logger.addHandler(VimLoggingHandler())
 
     global plugin_manager
