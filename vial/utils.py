@@ -111,7 +111,7 @@ def get_content_and_offset():
     return get_content(), offset - 1
 
 
-NOT_FILE_BUFFER_TYPES = set(('nofile', 'help'))
+NOT_FILE_BUFFER_TYPES = set(('nofile', 'help', 'quickfix'))
 
 
 def buffer_with_file(buf):

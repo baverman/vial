@@ -47,11 +47,13 @@ def echoerr(message=None): _echo('echoerr', message)
 
 def register_command(name, callback, bang=False, **opts):
     fargs = '' if opts.get('nargs', 0) == 0 else '<f-args>'
-    opts = ['-{}={}'.format(*r) for r in opts.iteritems()]
+    opts = ['-{}={}'.format(k, v) if v is not True else '-{}'.format(k)
+            for k, v in opts.items()]
     add = ''
     if bang:
         opts.append('-bang')
         add = '"<bang>", '
+
     vim.command('''command! {1} {0} python {2}({3}{4})'''.format(
         name, ' '.join(opts), ref(callback, 1), add, fargs))
 
@@ -134,9 +136,16 @@ class VimLoggingHandler(logging.Handler):
 
 def lfunc(name, depth=0):
     module_name, _, func_name = name.rpartition('.')
+    if not module_name:
+        module_name = '.'
+
     if module_name.startswith('.'):
         globs = sys._getframe(1 + depth).f_globals
-        module_name = globs['__package__'] + module_name
+        pkg = globs['__package__']
+        if module_name.strip('.'):
+            module_name = pkg + module_name
+        else:
+            module_name = pkg
 
     def inner(*args, **kwargs):
         try:

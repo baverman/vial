@@ -24,7 +24,7 @@ wrapper for common tasks such as:
     * Calling python functions from VimL
     * Pass command and func args to python functions
     * Lazy loading of python plugins
-    * Simple widgest
+    * Simple widgets
     * Window and buffer management
 
 In simple cases you can write plugins without any VimL at all. But in

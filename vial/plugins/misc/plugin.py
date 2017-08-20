@@ -63,7 +63,8 @@ def indent():
         while True:
             start, openb = max((pline.rfind(b, 0, start), b)
                                for b in parens.keys())
-            if start < 0: break
+            if start < 0:
+                break
             vfunc.cursor(line - 1, start + 1)
             l, _ = vfunc.searchpairpos(pescape[openb], '',
                                        pescape[parens[openb]], 'nW', '', line)
@@ -219,3 +220,9 @@ def add_ignore_dirs(bang, *dirs):
         result = list(get_dvar('vial_ignore_dirs'))
     result.extend(dirs)
     vim.vars['vial_ignore_dirs'] = list(set(result))
+
+
+def reload_plugin(plugin_name):
+    import vial
+    vial.plugin_manager.remove(plugin_name)
+    vial.plugin_manager.add(plugin_name)
