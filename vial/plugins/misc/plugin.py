@@ -220,9 +220,3 @@ def add_ignore_dirs(bang, *dirs):
         result = list(get_dvar('vial_ignore_dirs'))
     result.extend(dirs)
     vim.vars['vial_ignore_dirs'] = list(set(result))
-
-
-def reload_plugin(plugin_name):
-    import vial
-    vial.plugin_manager.remove(plugin_name)
-    vial.plugin_manager.add(plugin_name)

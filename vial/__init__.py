@@ -29,6 +29,12 @@ def init():
     global plugin_manager
     plugin_manager = PluginManager()
 
+    def reload_plugin(plugin_name):
+        plugin_manager.remove(plugin_name)
+        plugin_manager.add(plugin_name)
+
+    register_command('VialReloadPlugin', reload_plugin, nargs=1)
+
     for plugin in vim.vars.get('vial_plugins', []):
         plugin_manager.add(plugin)
 

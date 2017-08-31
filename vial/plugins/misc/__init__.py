@@ -13,7 +13,6 @@ def init():
                           '.plugin.add_ignore_extensions', bang=True, nargs='*')
     vial.register_command('VialAddIgnoreDirs', '.plugin.add_ignore_dirs',
                           complete='dir', bang=True, nargs='*')
-    vial.register_command('VialReloadPlugin', '.plugin.reload_plugin', nargs=1)
 
     vial.register_function('VialIndent()', '.plugin.indent')
 
