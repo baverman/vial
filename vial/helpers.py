@@ -42,7 +42,12 @@ def _echo(cmd, message):
 def echo(message=None): _echo('echo', message)
 def echon(message=None): _echo('echon', message)
 def echom(message=None): _echo('echom', message)
-def echoerr(message=None): _echo('echoerr', message)
+
+
+def echoerr(message=None):
+    vim.command('echohl ErrorMsg')
+    echom(message)
+    vim.command('echohl None')
 
 
 def register_command(name, callback, bang=False, **opts):
@@ -125,9 +130,7 @@ class VimLoggingHandler(logging.Handler):
             msg = msg + ' ^^^'
 
         if record.levelno >= logging.ERROR:
-            vim.command('echohl ErrorMsg')
-            echom(msg)
-            vim.command('echohl None')
+            echoerr(msg)
         elif record.levelno >= logging.DEBUG:
             echom(msg)
         else:
