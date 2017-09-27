@@ -10,19 +10,22 @@ log = logging.getLogger(__name__)
 refs = {}
 
 
-class VimFuncs(object):
-    def __init__(self):
-        self._cache = {}
+if hasattr(vim, 'funcs'):
+    vfunc = vim.funcs
+else:
+    class VimFuncs(object):
+        def __init__(self):
+            self._cache = {}
 
-    def __getattr__(self, name):
-        try:
-            return self._cache[name]
-        except KeyError:
-            pass
+        def __getattr__(self, name):
+            try:
+                return self._cache[name]
+            except KeyError:
+                pass
 
-        func = self._cache[name] = vim.bindeval('function("{}")'.format(name))
-        return func
-vfunc = VimFuncs()
+            func = self._cache[name] = vim.bindeval('function("{}")'.format(name))
+            return func
+    vfunc = VimFuncs()
 
 
 def bytestr(string):
@@ -74,7 +77,7 @@ def register_function(signature, callback):
 
 
 def vimcall(func, args):
-    lvars = vim.bindeval('a:')
+    lvars = vim.eval('a:')
     result = func(*[lvars[r] for r in args])
     if result is None:
         result = ''

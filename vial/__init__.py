@@ -45,7 +45,7 @@ def init():
 
 
 def init_session():
-    if 'this_session' not in vim.vvars.keys():
+    if not vim.vvars.get('this_session'):
         return
 
     vial_session_fname = vim.vvars['this_session']
