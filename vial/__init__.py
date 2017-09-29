@@ -13,6 +13,11 @@ if not hasattr(vim, 'vars'):
 if not hasattr(vim, 'vvars'):
     vim.vvars = vim.bindeval('v:')
 
+from .compat import sstr
+
+python_version = sstr(vim.vars.get('vial_python', 'python'))
+pyeval_version = 'py3eval' if python_version == 'python3' else 'pyeval'
+
 from .helpers import (register_command, register_function, VimLoggingHandler,
                       vfunc, ref, dref, refs, lfunc, PluginManager, python)
 

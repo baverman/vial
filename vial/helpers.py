@@ -4,7 +4,8 @@ import os.path
 import logging
 import traceback
 
-from . import vim
+from . import vim, python_version, pyeval_version
+from .compat import stype, bstr, listkeys
 
 log = logging.getLogger(__name__)
 refs = {}
@@ -23,22 +24,16 @@ else:
             except KeyError:
                 pass
 
-            func = self._cache[name] = vim.bindeval('function("{}")'.format(name))
+            func = self._cache[name] = vim.bindeval(bstr('function("{}")'.format(name)))
             return func
     vfunc = VimFuncs()
 
 
-def bytestr(string):
-    if isinstance(string, unicode):
-        string = string.encode('utf-8')
-
-    return string
-
-
 def _echo(cmd, message):
     if message:
-        message = vfunc.escape(bytestr(message), r'\"')
-        vim.command('{} "{}"'.format(cmd, message))
+        cmd = bstr(cmd)
+        message = vfunc.escape(bstr(message, 'utf-8'), r'\"')
+        vim.command(bstr('%s "%s"') % (cmd, message))
         vim.command(cmd)
 
 
@@ -62,8 +57,8 @@ def register_command(name, callback, bang=False, **opts):
         opts.append('-bang')
         add = '"<bang>", '
 
-    vim.command('''command! {1} {0} python {2}({3}{4})'''.format(
-        name, ' '.join(opts), ref(callback, 1), add, fargs))
+    vim.command('''command! {1} {0} {5} {2}({3}{4})'''.format(
+        name, ' '.join(opts), ref(callback, 1), add, fargs, python_version))
 
 
 args_regex = re.compile(r'(?:\(|,)\s*(\w+)')
@@ -72,8 +67,8 @@ args_regex = re.compile(r'(?:\(|,)\s*(\w+)')
 def register_function(signature, callback):
     args = args_regex.findall(signature)
     vim.command('''function! {0}
-      return pyeval("vial.helpers.vimcall({1}, {2})")
-    endfunction'''.format(signature, ref(callback, 1), args))
+      return {3}("vial.helpers.vimcall({1}, {2})")
+    endfunction'''.format(signature, ref(callback, 1), args, pyeval_version))
 
 
 def vimcall(func, args):
@@ -87,12 +82,12 @@ def vimcall(func, args):
 
 def python(fn, *args):
     args = ', '.join(repr(r) for r in args)
-    return 'python {}({})'.format(ref(fn, 1), args)
+    return '{} {}({})'.format(python_version, ref(fn, 1), args)
 
 
 class ref(object):
     def __init__(self, fn, depth=0):
-        if isinstance(fn, basestring):
+        if isinstance(fn, stype):
             fn = lfunc(fn, depth + 1)
 
         ofn = fn
@@ -237,10 +232,10 @@ class PluginManager(object):
 
     def remove(self, name):
         dotname = name + '.'
-        for k in refs.keys():
+        for k in listkeys(refs):
             if k.startswith(dotname):
                 del refs[k]
 
-        for k in sys.modules.keys():
+        for k in listkeys(sys.modules):
             if k == name or k.startswith(dotname):
                 del sys.modules[k]
