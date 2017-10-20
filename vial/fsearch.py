@@ -1,7 +1,7 @@
 import re
 
 from os import listdir
-from os.path import join, isdir, split
+from os.path import join, isdir, split, islink
 
 from .utils import get_dvar
 
@@ -17,6 +17,8 @@ def _walk(root, top, ignore_files=None, ignore_dirs=None):
         for name in dir_list:
             path = join(top, name)
             fullpath = join(root, top, name)
+            if islink(fullpath):
+                continue
             if isdir(fullpath):
                 if not ignore_dirs or not ignore_dirs.match(path):
                     dirs_to_visit.append(path)
