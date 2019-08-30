@@ -14,6 +14,8 @@ if not hasattr(vim, 'vvars'):
     vim.vvars = vim.bindeval('v:')
 
 from .compat import sstr
+from tempfile import gettempdir
+from os.path import join as pathjoin
 
 python_version = sstr(vim.vars.get('vial_python', 'python'))
 pyeval_version = 'py3eval' if python_version == 'python3' else 'pyeval'
@@ -28,7 +30,7 @@ def init():
     import logging
     root_logger = logging.getLogger()
     root_logger.handlers[:] = []
-    root_logger.addHandler(logging.FileHandler('/tmp/vial-error.log'))
+    root_logger.addHandler(logging.FileHandler(pathjoin(gettempdir(), 'vial-error.log')))
     root_logger.addHandler(VimLoggingHandler())
 
     global plugin_manager
