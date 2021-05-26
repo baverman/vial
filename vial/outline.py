@@ -32,7 +32,11 @@ def get_outline(items):
                 if 'dead' in item:
                     return push_childs(inner, level, parent, la + 1)
 
-                return push_childs(inner, level, result[-1]['path'], la)(item)
+                if result:
+                    ppath = result[-1]['path']
+                else:
+                    ppath = ()
+                return push_childs(inner, level, ppath, la)(item)
             else:
                 return pf(item)
 

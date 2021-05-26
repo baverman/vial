@@ -1,3 +1,5 @@
+from __future__ import print_function
+
 import re
 import os.path
 import fnmatch
@@ -37,44 +39,62 @@ def shift_indent(line, shift=1):
 parens = {'(': ')', '{': '}', '[': ']'}
 rparens = {v: k for k, v in parens.iteritems()}
 pescape = {'(': '(', ')': ')', '[': '\[', ']': '\]', '{': '{', '}': '}'}
+s_skip = 'synIDattr(synID(line("."), col("."), 0), "name") =~? "string"'
 
+
+def get_nearest_paren(lnum, pos):
+    result = []
+    for o, c in parens.items():
+        l, p = vfunc.searchpairpos(pescape[o], '', pescape[c], 'bWn', s_skip, 0, 10)
+        if l != 0:
+            result.append((lnum-l, pos-p, (l, p)))
+
+    # log.error(repr(result))
+    if result:
+        result.sort()
+        return result[0][2]
+
+
+import logging
+log = logging.getLogger()
 
 def indent():
-    line, pos = vim.current.window.cursor
+    lnum, pos = vim.current.window.cursor
     buf = vim.current.buffer
-    if buf[line-2].endswith(':'):
-        return shift_indent(line)
+    if lnum > 1:
+        # previous line ends with a colon
+        if buf[lnum-2].endswith(':'):
+            # log.error(('lnum > 1:', lnum, shift_indent(lnum)))
+            return shift_indent(lnum)
 
-    pline = buf[line-2].rstrip()
-    if pline and pline[-1] in parens.keys():
-        return shift_indent(line)
+        pline = buf[lnum-2].rstrip()
+        if pline and pline[-1] in parens.keys():
+            # log.error(('lnum > 1 op ', lnum, repr(pline), shift_indent(lnum)))
+            return shift_indent(lnum)
 
-    if pline:
-        start, closeb = max((pline.rfind(b), b) for b in parens.values())
-        if start >= 0:
-            openb = rparens[closeb]
-            vfunc.cursor(line - 1, start + 1)
-            l, _ = vfunc.searchpairpos(pescape[openb], '', pescape[closeb],
-                                       'nWb', '', max(0, line - 30))
-            if l and l != line - 1:
-                return vfunc.indent(l)
+        if pline and pline[-2:] in ('"\\', "'\\"):
+            # log.error(('lnum > 1 "\\ ', lnum, repr(pline), shift_indent(lnum)))
+            return shift_indent(lnum)
 
-        start = -1
-        while True:
-            start, openb = max((pline.rfind(b, 0, start), b)
-                               for b in parens.keys())
-            if start < 0:
-                break
-            vfunc.cursor(line - 1, start + 1)
-            l, _ = vfunc.searchpairpos(pescape[openb], '',
-                                       pescape[parens[openb]], 'nW', '', line)
-            if not l or l != line - 1:
-                return start + 1
+        if pline and pline.endswith(','):
+            np = get_nearest_paren(lnum, pos)
+            if np and np[0] < lnum and np[1] < len(buf[np[0]-1]):
+                # log.error(('np', lnum, pos, np))
+                return np[1]
 
-    w = vfunc.indent(line-1)
-    if not buf[line-1].strip() and w != pos:
+    # current lines starts with a close parent
+    cline = buf[lnum-1].lstrip()
+    if cline and cline[0] in parens.values():
+        # log.error(('cline', repr(cline), vfunc.cindent(lnum)))
+        return vfunc.cindent(lnum)
+
+    # get indent of previous line
+    w = vfunc.indent(lnum-1)
+    if not buf[lnum-1].strip() and w != pos:
+        # log.error(('pline', w))
         return -1
 
+    # log.error(('Else', w))
     return w
 
 
@@ -154,9 +174,9 @@ def changed_projects():
 
         if proc.returncode != 0:
             if err.strip():
-                print err
+                print(err)
             else:
-                print 'Git error', proc.returncode
+                print('Git error', proc.returncode)
         else:
             for line in out.splitlines():
                 if not line.startswith('##') or 'ahead' in line:
@@ -164,7 +184,7 @@ def changed_projects():
                     break
 
     if changed:
-        print ', '.join(os.path.basename(r) for r in changed)
+        print(', '.join(os.path.basename(r) for r in changed))
     else:
         echo('There are no any changes')
 

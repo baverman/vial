@@ -15,4 +15,3 @@ def init():
                           complete='dir', bang=True, nargs='*')
 
     vial.register_function('VialIndent()', '.plugin.indent')
-
