@@ -3,6 +3,7 @@ import re
 
 from . import vim, vfunc
 from .helpers import echo, echon, echom, echoerr
+from .compat import bstr, sstr
 
 
 KEY_CACHE = {}
@@ -14,15 +15,15 @@ def get_key_code(key):
     except KeyError:
         pass
 
-    code = KEY_CACHE[key] = vfunc.eval('"\<{}>"'.format(key))
+    code = KEY_CACHE[key] = sstr(vfunc.eval(r'"\<{}>"'.format(key)))
     return code
 
 
 keys_re = re.compile(r'<(.+?)>')
 
 
-def replace_key_match(match):
-    return get_key_code(match.group(1))
+def replace_key_match(m):
+    return get_key_code(m.group(1))
 
 
 def parse_keys(keys):
