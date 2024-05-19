@@ -5,29 +5,21 @@ from . import vim, vfunc
 from .helpers import echo, echon, echom, echoerr
 from .compat import bstr, sstr
 
+EVAL_CACHE = {}
 
-KEY_CACHE = {}
 
-
-def get_key_code(key):
+def eval_cache(expr):
     try:
-        return KEY_CACHE[key]
+        return EVAL_CACHE[expr]
     except KeyError:
         pass
 
-    code = KEY_CACHE[key] = sstr(vfunc.eval(r'"\<{}>"'.format(key)))
-    return code
+    rv = EVAL_CACHE[expr] = vfunc.eval(expr)
+    return rv
 
 
-keys_re = re.compile(r'<(.+?)>')
-
-
-def replace_key_match(m):
-    return get_key_code(m.group(1))
-
-
-def parse_keys(keys):
-    return keys_re.sub(replace_key_match, keys)
+def get_key_code(code):
+    return eval_cache(r'"{}"'.format(code))
 
 
 def get_key():
@@ -37,10 +29,8 @@ def get_key():
         if len(c) == 1:
             is_special = ord(c) < 32
         else:
-            if c[0] == chr(128):
+            if c[0] == 128:
                 is_special = True
-            else:
-                c = c.decode('utf-8')
 
     return c, is_special
 
@@ -67,7 +57,7 @@ def get_buf_by_name(name):
 
 
 def get_projects():
-    return get_var('vial_projects') or [os.getcwd()]
+    return get_list_var('vial_projects') or [os.getcwd()]
 
 
 def get_winbuf(name):
@@ -84,16 +74,36 @@ def get_winbuf(name):
 
 def get_var(name, default=None):
     try:
-        return vim.vars[name]
+        return vim.vars[bstr(name)]
     except KeyError:
         return default
 
 
 def get_dvar(name):
     try:
-        return vim.vars[name]
+        return vim.vars[bstr(name)]
     except KeyError:
-        return vim.vars[name + '_default']
+        return vim.vars[bstr(name + '_default')]
+
+
+def get_list_var(name, default=None):
+    if default is None:
+        default = []
+    return [sstr(it) for it in get_var(name, default)]
+
+
+def get_list_dvar(name):
+    return [sstr(it) for it in get_dvar(name)]
+
+
+def get_dict_var(name, default=None):
+    if default is None:
+        default = {}
+    return {sstr(k): sstr(v) for k, v in get_var(name, default).items()}
+
+
+def get_dict_dvar(name):
+    return {sstr(k): sstr(v) for k, v in get_dvar(name).items()}
 
 
 def focus_window(winnr):
@@ -112,7 +122,7 @@ def get_content_and_offset():
     return get_content(), offset - 1
 
 
-NOT_FILE_BUFFER_TYPES = set(('nofile', 'help', 'quickfix'))
+NOT_FILE_BUFFER_TYPES = set((b'nofile', b'help', b'quickfix'))
 
 
 def buffer_with_file(buf):

@@ -15,7 +15,7 @@ if not hasattr(vim, 'vvars'):
 
 from .compat import sstr
 
-python_version = sstr(vim.vars.get('vial_python', 'python'))
+python_version = sstr(vim.vars.get('vial_python', 'python3'))
 pyeval_version = 'py3eval' if python_version == 'python3' else 'pyeval'
 
 from .helpers import (register_command, register_function, VimLoggingHandler,
@@ -40,11 +40,11 @@ def init():
 
     register_command('VialReloadPlugin', reload_plugin, nargs=1)
 
-    for plugin in vim.vars.get('vial_plugins', []):
+    for plugin in map(sstr, vim.vars.get('vial_plugins', [])):
         plugin_manager.add(plugin)
 
     if not vim.vars.get('vial_disable_auto_discovery'):
-        plugin_manager.add_from(vim.eval('&runtimepath').split(','))
+        plugin_manager.add_from(sstr(vim.eval('&runtimepath')).split(','))
 
     init_session()
 
@@ -53,9 +53,9 @@ def init_session():
     if not vim.vvars.get('this_session'):
         return
 
-    vial_session_fname = vim.vvars['this_session']
+    vial_session_fname = sstr(vim.vvars['this_session'])
     if vial_session_fname.endswith('.vim'):
         vial_session_fname = vial_session_fname[:-4]
 
     vial_session_fname += 'v.vim'
-    vim.command('silent! source {}'.format(vfunc.fnameescape(vial_session_fname)))
+    vim.command('silent! source {}'.format(sstr(vfunc.fnameescape(vial_session_fname))))

@@ -1,5 +1,6 @@
-from . import vim, loop
-from .utils import get_key_code, echo, redraw, focus_window, get_buf_by_name
+from . import vim, loop, python_version
+from .compat import sstr
+from .utils import get_key_code, echo, redraw, focus_window, get_buf_by_name, eval_cache
 
 
 class ListFormatter(object):
@@ -107,19 +108,19 @@ class SearchDialog(object):
         self.loop = None
 
     def init(self, win, buf):
-        self.loop = loop.Loop(get_key_code('Plug') + 'l')
-        self.loop.on_key('CR',   self._exit, True)
-        self.loop.on_key('Esc',  self._exit)
-        self.loop.on_key('C-L',  self._select)
-        self.loop.on_key('Up',   self._move_cursor, -1)
-        self.loop.on_key('C-K',  self._move_cursor, -1)
-        self.loop.on_key('C-P',  self._move_cursor, -1)
-        self.loop.on_key('Down', self._move_cursor, 1)
-        self.loop.on_key('C-J',  self._move_cursor, 1)
-        self.loop.on_key('C-N',  self._move_cursor, 1)
-        self.loop.on_key('BS',   self._prompt_changed, None)
+        self.loop = loop.Loop(get_key_code(r'\<Plug>l'))
+        self.loop.on_key(r'\<CR>',   self._exit, True)
+        self.loop.on_key(r'\<Esc>',  self._exit)
+        self.loop.on_key(r'\<C-L>',  self._select)
+        self.loop.on_key(r'\<Up>',   self._move_cursor, -1)
+        self.loop.on_key(r'\<C-K>',  self._move_cursor, -1)
+        self.loop.on_key(r'\<C-P>',  self._move_cursor, -1)
+        self.loop.on_key(r'\<Down>', self._move_cursor, 1)
+        self.loop.on_key(r'\<C-J>',  self._move_cursor, 1)
+        self.loop.on_key(r'\<C-N>',  self._move_cursor, 1)
+        self.loop.on_key(r'\<BS>',   self._prompt_changed, None)
         self.loop.on_printable(self._prompt_changed)
-        vim.command('noremap <buffer> <silent> <Plug>l :python vial.loop.pop()<CR>')
+        vim.command('noremap <buffer> <silent> <Plug>l :{} vial.loop.pop()<CR>'.format(python_version))
 
     def show(self, prompt=None):
         self.win, self.buf = make_scratch(self.name, self.init,
@@ -167,7 +168,7 @@ class SearchDialog(object):
         if key is None:
             self._prompt = self._prompt[:-1]
         else:
-            self._prompt += key
+            self._prompt += sstr(key)
 
         self._update_status()
         self.on_prompt_changed(self._prompt)

@@ -1,9 +1,9 @@
 import re
 
 from os import listdir
-from os.path import join, isdir, split, islink
+from os.path import join, isdir, split, islink, isfile
 
-from .utils import get_dvar
+from .utils import get_list_dvar
 
 
 def _walk(root, top, ignore_files=None, ignore_dirs=None):
@@ -17,12 +17,10 @@ def _walk(root, top, ignore_files=None, ignore_dirs=None):
         for name in dir_list:
             path = join(top, name)
             fullpath = join(root, top, name)
-            if islink(fullpath):
-                continue
-            if isdir(fullpath):
+            if isdir(fullpath) and not islink(fullpath):
                 if not ignore_dirs or not ignore_dirs.match(path):
                     dirs_to_visit.append(path)
-            else:
+            elif isfile(fullpath):
                 if not ignore_files or not ignore_files.match(path):
                     yield name, path, root, top, fullpath
 
@@ -40,10 +38,10 @@ def get_files(root, cache=None, keep_top=False):
 
     ignore_files = re.compile('.*({})$'.format(
         '|'.join(r'\.{}'.format(r)
-                 for r in get_dvar('vial_ignore_extensions'))))
+                 for r in get_list_dvar('vial_ignore_extensions'))))
 
     ignore_dirs = re.compile('({})'.format('|'.join(
-        get_dvar('vial_ignore_dirs'))))
+        get_list_dvar('vial_ignore_dirs'))))
 
     fcache = []
     if keep_top:

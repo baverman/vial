@@ -1,7 +1,8 @@
 from time import time
 from itertools import groupby
 
-from vial import vfunc, vim, dref
+from vial import vfunc, vim, dref, python_version
+from vial.compat import iteritems
 from vial.utils import echon, redraw
 from os.path import split
 
@@ -77,7 +78,7 @@ def jump(dir):
     dups = True
     while dups:
         dups = False
-        for name, g in groupby(sorted(names.iteritems(), key=skey), skey):
+        for name, g in groupby(sorted(iteritems(names), key=skey), skey):
             g = list(g)
             if len(g) > 1:
                 dups = True
@@ -139,5 +140,5 @@ def jump(dir):
 
     vim.command('augroup vial_bufhist_wait_action')
     vim.command('au!')
-    vim.command('au CursorMoved,CursorHold <buffer> python %s()' % moved.ref)
+    vim.command('au CursorMoved,CursorHold <buffer> %s %s()' % (python_version, moved.ref))
     vim.command('augroup END')

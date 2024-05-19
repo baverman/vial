@@ -7,8 +7,9 @@ import fnmatch
 from subprocess import Popen, PIPE
 
 from vial import vfunc, vim
+from vial.compat import iteritems, sstr
 from vial.utils import (buffer_with_file, focus_window, get_ws_len, mark,
-                        echo, get_projects, get_dvar)
+                        echo, get_projects, get_list_dvar)
 from vial.widgets import SearchDialog, ListFormatter, ListView
 
 
@@ -20,7 +21,7 @@ def escape():
 
     for n, w in reversed(list(enumerate(vim.windows, 1))):
         if not buffer_with_file(w.buffer):
-            if not '[Command Line]'in w.buffer.name:
+            if not '[Command Line]' in w.buffer.name:
                 focus_window(n)
             vim.command('q')
             if n != cur:
@@ -37,8 +38,8 @@ def shift_indent(line, shift=1):
 
 
 parens = {'(': ')', '{': '}', '[': ']'}
-rparens = {v: k for k, v in parens.iteritems()}
-pescape = {'(': '(', ')': ')', '[': '\[', ']': '\]', '{': '{', '}': '}'}
+rparens = {v: k for k, v in iteritems(parens)}
+pescape = {'(': '(', ')': ')', '[': r'\[', ']': r'\]', '{': '{', '}': '}'}
 s_skip = 'synIDattr(synID(line("."), col("."), 0), "name") =~? "string"'
 
 
@@ -179,12 +180,12 @@ def changed_projects():
                 print('Git error', proc.returncode)
         else:
             for line in out.splitlines():
-                if not line.startswith('##') or 'ahead' in line:
+                if not line.startswith(b'##') or b'ahead' in line:
                     changed.append(p)
                     break
 
     if changed:
-        print(', '.join(os.path.basename(r) for r in changed))
+        print(', '.join(os.path.basename(sstr(r)) for r in changed))
     else:
         echo('There are no any changes')
 
@@ -228,7 +229,7 @@ def add_ignore_extensions(bang, *exts):
     if bang:
         result = []
     else:
-        result = list(get_dvar('vial_ignore_extensions'))
+        result = list(get_list_dvar('vial_ignore_extensions'))
     result.extend(exts)
     vim.vars['vial_ignore_extensions'] = list(set(result))
 
@@ -237,6 +238,6 @@ def add_ignore_dirs(bang, *dirs):
     if bang:
         result = []
     else:
-        result = list(get_dvar('vial_ignore_dirs'))
+        result = list(get_list_dvar('vial_ignore_dirs'))
     result.extend(dirs)
     vim.vars['vial_ignore_dirs'] = list(set(result))
