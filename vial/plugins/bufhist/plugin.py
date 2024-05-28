@@ -107,7 +107,7 @@ def jump(dir):
     before = '  '.join(names[r][1] for r in history[:idx])
     after = '  '.join(names[r][1] for r in history[idx+1:])
 
-    half = (width - len(active) - 4) / 2
+    half = (width - len(active) - 4) // 2
     if len(before) < len(after):
         blen = min(half, len(before))
         alen = width - len(active) - blen - 4
