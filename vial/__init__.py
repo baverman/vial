@@ -1,5 +1,8 @@
 VERSION = '0.1dev'
 
+import tempfile
+import os.path
+
 try:
     import vim
 except ImportError:
@@ -28,7 +31,9 @@ def init():
     import logging
     root_logger = logging.getLogger()
     root_logger.handlers[:] = []
-    root_logger.addHandler(logging.FileHandler('/tmp/vial-error.log'))
+
+    log_file = vim.vars.get('vial_log_file', os.path.join(tempfile.gettempdir(), 'vial-error.log'))
+    root_logger.addHandler(logging.FileHandler(log_file))
     root_logger.addHandler(VimLoggingHandler())
 
     global plugin_manager
