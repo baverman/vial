@@ -3,9 +3,17 @@ VERSION = '0.1dev'
 try:
     import vim
 except ImportError:
+    class bdict(dict):
+        def __setitem__(self, key, value):
+            return super().__setitem__(key.encode(), value)
+
     class vim:
-        vars = {}
-        vvars = {}
+        vars = bdict()
+        vvars = bdict()
+
+        @staticmethod
+        def command(*args, **kwargs):
+            pass
 
 if not hasattr(vim, 'vars'):
     vim.vars = vim.bindeval('g:')
