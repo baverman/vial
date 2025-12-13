@@ -15,3 +15,6 @@ def init():
                           complete='dir', bang=True, nargs='*')
 
     vial.register_function('VialIndent()', '.plugin.indent')
+
+    vial.register_command('VialRun', '.plugin.run', nargs=1)
+    vial.register_command('VialQFRun', '.plugin.qf_run', nargs=1)

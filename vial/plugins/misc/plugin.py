@@ -3,6 +3,7 @@ from __future__ import print_function
 import re
 import os.path
 import fnmatch
+import shlex
 
 from subprocess import Popen, PIPE
 
@@ -11,6 +12,7 @@ from vial.compat import iteritems, sstr
 from vial.utils import (buffer_with_file, focus_window, get_ws_len, mark,
                         echo, get_projects, get_list_dvar)
 from vial.widgets import SearchDialog, ListFormatter, ListView
+from vial.helpers import echom
 
 
 def escape():
@@ -241,3 +243,50 @@ def add_ignore_dirs(bang, *dirs):
         result = list(get_list_dvar('vial_ignore_dirs'))
     result.extend(dirs)
     vim.vars['vial_ignore_dirs'] = list(set(result))
+
+
+def run(cmd):
+    cwd = vim.current.buffer.vars.get('vial_run_cwd')
+
+    if '%' in cmd:
+        fname = vim.current.buffer.name
+        if fname:
+            cmd = cmd.replace('%', shlex.quote(fname))
+        else:
+            cmd = cmd.replace('%', '')
+
+    if vim.current.buffer.options['modified']:
+        vim.command('write')
+
+    proc = Popen(cmd, shell=True, cwd=cwd, stdout=PIPE, stderr=PIPE)
+    out, err = proc.communicate()
+
+    vim.command('checktime')
+
+    vim.command('echohl ModeMsg')
+    out.strip() and echom(out.decode(errors='ignore').strip())
+    err.strip() and echom(err.decode(errors='ignore').strip())
+    vim.command('echohl None')
+    vim.command('redraw')
+
+
+def qf_run(cmd):
+    cwd = vim.current.buffer.vars.get('vial_run_cwd')
+
+    if '%' in cmd:
+        fname = vim.current.buffer.name
+        if fname:
+            cmd = cmd.replace('%', shlex.quote(fname))
+        else:
+            cmd = cmd.replace('%', '')
+
+    if vim.current.buffer.options['modified']:
+        vim.command('write')
+
+    proc = Popen(cmd, shell=True, cwd=cwd, stdout=PIPE, stderr=PIPE)
+    out, err = proc.communicate()
+
+    data = '\n'.join(filter(None, [out.decode(errors='ignore').strip(), err.decode(errors='ignore').strip()]))
+    vim.vars['tmp_vial_value'] = data
+    vim.command('cgetexpr g:tmp_vial_value')
+    vim.command('cwindow')
