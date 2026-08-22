@@ -11,7 +11,7 @@ from vial import vfunc, vim
 from vial.compat import iteritems, sstr
 from vial.utils import (buffer_with_file, focus_window, get_ws_len, mark,
                         echo, get_projects, get_list_dvar)
-from vial.widgets import SearchDialog, ListFormatter, ListView
+from vial.widgets import SearchDialog, ListFormatter, ListView, make_scratch
 from vial.helpers import echom
 
 
@@ -289,4 +289,11 @@ def qf_run(cmd):
     data = '\n'.join(filter(None, [out.decode(errors='ignore').strip(), err.decode(errors='ignore').strip()]))
     vim.vars['tmp_vial_value'] = data
     vim.command('cgetexpr g:tmp_vial_value')
-    vim.command('cwindow')
+
+    qf = vfunc.filter(vfunc.getqflist(), 'v:val.valid')
+    if qf:
+        vim.command('cwindow')
+    elif proc.returncode != 0:
+        win, buf = make_scratch('__vial_qf_run__')
+        buf[:] = data.splitlines(False)
+        win.cursor = 1, 0
